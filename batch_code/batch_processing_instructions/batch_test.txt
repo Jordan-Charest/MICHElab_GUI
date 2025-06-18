@@ -1,0 +1,17 @@
+# Downsample all 3d datasets from 12 to 3 fps
+D:\mouse_data\formatted\M{mouse_num}\formatted\M{mouse_num}_TEST.h5 downsampling data/3d/HbT,data/3d/GCaMP,data/3d/dHbO,data/3d/dHbR original_fps=12;int target_fps=3;int
+
+# Apply intensity mask based on IOI avg 2d data
+D:\mouse_data\formatted\M{mouse_num}\formatted\M{mouse_num}_TEST.h5 intensity_mask data/3d/HbT,data/3d/GCaMP,data/3d/dHbO,data/3d/dHbR,data/2d/avg mask_path=data/2d/avg;str threshold=0.09;float dilation=1;int copy_name=masked;str
+
+# Apply detrending to dHbR and dHbO (don't forget the _masked appended during step 2)
+D:\mouse_data\formatted\M{mouse_num}\formatted\M{mouse_num}_TEST.h5 detrending data/3d/dHbO_masked,data/3d/dHbR_masked window=150;int sigma1=1;float sigma2=12;float offset=1000;float copy_name=None;str
+
+# Apply bandpass filter 
+D:\mouse_data\formatted\M{mouse_num}\formatted\M{mouse_num}_TEST.h5 bandpass data/3d/GCaMP_masked,data/3d/HbT_masked,data/3d/dHbO_masked,data/3d/dHbR_masked method=fourier;str lowcut=0.05;float highcut=1.3;float order=3;int copy_name=bandpass;str
+
+# Apply gaussian time filter 
+D:\mouse_data\formatted\M{mouse_num}\formatted\M{mouse_num}_TEST.h5 time_gauss_filter data/3d/GCaMP_masked_bandpass,data/3d/HbT_masked_bandpass,data/3d/dHbO_masked_bandpass,data/3d/dHbR_masked_bandpass sigma=5;float radius=6;int
+
+# Zscore data
+D:\mouse_data\formatted\M{mouse_num}\formatted\M{mouse_num}_TEST.h5 zscore data/3d/GCaMP_masked_bandpass,data/3d/HbT_masked_bandpass,data/3d/dHbO_masked_bandpass,data/3d/dHbR_masked_bandpass

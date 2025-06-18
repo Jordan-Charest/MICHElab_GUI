@@ -1,0 +1,6 @@
+<filename> detrending <datasets> window=;int sigma1=;float sigma2=;float offset=;float copy_name=;str
+<filename> bandpass <datasets> method=;str lowcut=;float highcut=;float order=;int copy_name=;str
+<filename> downsampling <datasets> original_fps=;int target_fps=;int
+<filename> intensity_mask <datasets> mask_path=;str threshold=;float dilation=;int copy_name=;str
+<filename> time_gauss_filter <datasets> sigma=;float radius=;int
+<filename> zscore <datasets>

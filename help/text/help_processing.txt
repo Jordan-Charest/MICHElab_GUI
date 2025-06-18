@@ -1,0 +1,25 @@
+Cet onglet permet d'explorer les jeux de données contenus dans des fichiers HDF5 et d'y appliquer des opérations prédéfinies.
+
+[1] sélection du fichier: le fichier à modifier est sélectionné manuellement en appuyant sur «Browse», ou alors en entrant manuellement le chemin d'accès dans «Input File».
+Le champ «Output File» contient le chemin du fichier de sortie qui comprendra les modifications effectuées par les scripts d'opérations. Par défaut, le champ s'auto-complète avec le chemin du fichier d'entrée choisi par «Browse», avec «_processed» ajouté avant l'extension (par exemple, fichier.h5 devient fichier_processed.h5), mais il peut être modifié manuellement.
+La case à cocher «Process without copy» fait en sorte que les opérations sont effectuées directement dans le fichier d'entrée plutôt que d'en faire une copie. En conséquence, cocher la case désactive le champ «Output File».
+
+[2] tableau de jeu de données (datasets): une fois le fichier HDF5 sélectionné dans la zone 1, sa structure est affichée dans ce tableau.
+La colonne «Dataset Path» contient le chemin (groups et subgroups, selon la nomenclature de h5py) pour accéder aux jeux de données. La colonne «Shape» contient les dimensions des données dans le cas où il s'agit de numpy array. La colonne «Type» contient le type de données. Plusieurs jeux de données peuvent être sélectionnés simultanément avec la touche Shift.
+
+[3] tableau d'attributs: lorsqu'un jeu de données est sélectionné dans 2, ses attributs (ou métadonnées) apparaissent ici. Ces attributs sont ajoutés lors de l'ajout du jeu de données au fichier HDF5, ou lors de l'éxécution des opérations.
+
+[4] ajout ou retrait d'un jeu de données: des jeux de données peuvent être ajoutés ou retirés du fichier HDF5 avec les boutons «Add Dataset» et «Delete Dataset», respectivement. Le bouton «Add Dataset» ouvre une fenêtre de dialogue dans laquelle les données à ajouter peuvent être sélectionnées et les attributs peuvent être ajoutés. Les types de données supportés (extensions .npy et .tif par défaut) peuvent être ajustés en modifiant la variable VALID_EXTENSIONS. Le bouton «Delete Dataset» ouvre une fenêtre demandant à l'utilisateur s'il souhaite vraiment supprimer le jeu de données sélectionné.
+
+[5] scripts d'opérations: cette fenêtre comporte une liste des scripts d'opérations disponibles. Il n'affiche que quelques scripts à la fois mais peut être déroulé avec la molette de la souris. Par défaut, les scripts doivent se trouver dans un sous-dossier nommé operations, mais un autre dossier peut être précisé en modifiant la variable SCRIPT_DIRECTORY.
+Plusieurs scripts peuvent être sélectionnés en cliquant séquentiellement sur leurs noms, et désélectionnés en appuyant de nouveau. Une fois sélectionnés, ils s'affichent dans 6.
+
+[6] sélection de scripts: les scripts sélectionnés s'affichent ici et conservent l'ordre de leur sélection. Une fois que l'utilisateur appuie sur «Run Processing», les opérations s'appliqueront sur les jeux de données sélectionnés dans cet ordre. Pour désélectionner tous les scripts, l'utilisateur peut appuyer n'importe où dans cette fenêtre.
+
+[7] options de visualisation: comporte plusieurs options qui permettent à l'utilisateur de visualiser les données.
+Le bouton «Preview» affiche le jeu de données sélectionné: une série temporelle s'il s'agit de données en une dimension, et une image 2d s'il s'agit de données en deux ou trois dimensions (dans ce dernier cas, l'image affichée correspond à l'élément d'indice 0 du jeu de données, généralement t=0). Les cases «Viridis» et «Coolwarm» permettent de sélectionner la colormap utilisée pour afficher les données.
+La case «1D Timecourse from 3D data» permet d'afficher une série temporelle en une dimension correspondant au moyennage spatial de données en trois dimensions. La case «Power Spectrum Density» permet d'afficher la densité spectrale de données en une ou trois dimensions.
+Le bouton «Seed Based Correlation» ouvre une nouvelle fenêtre qui permet de visualiser la seed based correlation français de données en trois dimensions.
+
+[8] log et éxécution: la fenêtre comporte un log des opérations effectuées et erreurs rencontrées.
+Sous la fenêtre, le bouton «Run Processing» permet de lancer l'éxécution. Les scripts d'opération s’exécuteront sur les jeux de données sélectionnés dans 2, dans l'ordre affiché dans 6.
