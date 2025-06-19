@@ -49,7 +49,6 @@ n_data = len(filepaths_to_import) # TODO: Probably can be removed and replaced d
 keys = ["HbT", "GCaMP", "avg", "face_motion", "pupillo"]    # Strings for the data to import, same order as in filepaths_to_import
 dimensions = [3, 3, 2, 1, 1]  # Number of dimensions for the signals, same order as above
 fps = [fps_num, fps_num, 0, fps_num, fps_num]  # fps for each signal, same order as above. 2d datasets have fps = 0 (such as avg, for instance)
-start_index_1d = 0  # Starting index for 1d datasets; set to None for automatic gradient-based start.
 
 debug = False       # Print stuff for debugging purposes
 
@@ -69,29 +68,6 @@ def read_data(filename):
     
     raise ValueError("Could not recognize file extension.")
 
-def split_dataset_path(dataset_path):
-    """
-    Splits a full dataset path into the group path and the dataset name.
-
-    Parameters:
-        dataset_path (str): Full path to the dataset (e.g., "group1/group2/group3/dataset").
-
-    Returns:
-        group_path (str): Path to the group (e.g., "group1/group2/group3").
-        dataset_name (str): Name of the dataset (e.g., "dataset").
-    """
-    # Split the dataset path
-    group_path, dataset_name = os.path.split(dataset_path)
-    
-    return group_path, dataset_name
-
-
-###################### MAIN SCRIPT ######################
-
-# Create dataset file if it doesn't exist
-# WARNING: setting overwrite to True will delete the whole dataset. Use it with caution!
-create_hdf5(dataset_filename, overwrite=overwrite)
-
 def restrict_time(array, start, stop):
     """Includes start and excludes stop"""
 
@@ -108,6 +84,13 @@ def restrict_time(array, start, stop):
     
     else:
         raise ValueError("Invalid dimension for restrict_time.")
+
+
+###################### MAIN SCRIPT ######################
+
+# Create dataset file if it doesn't exist
+# WARNING: setting overwrite to True will delete the whole dataset. Use it with caution!
+create_hdf5(dataset_filename, overwrite=overwrite)
 
 # Add data and attributes to HDF5 file
 for i in range(n_data):

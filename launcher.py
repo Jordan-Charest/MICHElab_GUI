@@ -2,21 +2,26 @@
 from gui_tabs.Visualize_DimRed_GUI import visualize_DimRedGUI
 from gui_tabs.Compute_DimRed_GUI import compute_DimRedGUI
 from gui_tabs.Processing_GUI import processingGUI
+from gui_tabs.Create_HDF5_dataset_GUI import create_HDF5_dataset_GUI
 
 from tkinter import ttk
 import tkinter as tk
 from tkinter.scrolledtext import ScrolledText
 from PIL import Image, ImageTk
 import os
+import sys
+import traceback
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 HELP_TEXT_DIR = os.path.join(BASE_DIR, "help/text")
 HELP_IMG_DIR = os.path.join(BASE_DIR, "help/images")
+DISABLE_ERROR_CATCHING = False # Set this to True to disable the GUI Log error catching
 
 class Launcher(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("Unified GUI Launcher")
+
+        self.title("MICHElab GUI")
         self.geometry("800x600")
 
         top_frame = tk.Frame(self)
@@ -24,6 +29,12 @@ class Launcher(tk.Tk):
 
         self.help_button = tk.Button(top_frame, text="Help", command=self.show_help)
         self.help_button.pack(side="right", padx=10, pady=1)
+
+        # For logging purposes
+        self.log_buffer = []
+
+        self.log_button = tk.Button(top_frame, text="Show Log", command=self.show_log)
+        self.log_button.pack(side="right", padx=10, pady=1)
 
         self.notebook = ttk.Notebook(self)
         self.notebook.pack(fill="both", expand=True)
@@ -33,7 +44,9 @@ class Launcher(tk.Tk):
         visualize_dimred = visualize_DimRedGUI(self.notebook)
         compute_dimred = compute_DimRedGUI(self.notebook)
         processing = processingGUI(self.notebook)
+        create_HDF5 = create_HDF5_dataset_GUI(self.notebook)
 
+        self.notebook.add(create_HDF5, text="Create HDF5")
         self.notebook.add(processing, text="HDF5 processing")
         self.notebook.add(visualize_dimred, text="Preview dim. red.")
         self.notebook.add(compute_dimred, text="Compute dim. red.")
@@ -41,6 +54,13 @@ class Launcher(tk.Tk):
         # Track tab changes
         self.current_tab_name = self.notebook.tab(self.notebook.select(), "text")
         self.notebook.bind("<<NotebookTabChanged>>", self.on_tab_change)
+
+        if not DISABLE_ERROR_CATCHING:
+            sys.stdout = self
+            sys.stderr = self
+            sys.excepthook = self.handle_exception
+
+        print("App started")
 
     def on_tab_change(self, event):
         selected_tab = event.widget.select()
@@ -82,6 +102,74 @@ class Launcher(tk.Tk):
         text_widget.pack(padx=10, pady=10)
 
         tk.Button(popup, text="Close", command=popup.destroy).pack(pady=(0, 10))
+
+    def log_message(self, message):
+        message = message.strip()
+        if not message:
+            return
+
+        self.log_buffer.append(message)
+
+        if hasattr(self, 'log_text') and self.log_text.winfo_exists():
+            self.log_text.configure(state="normal")
+            self.log_text.insert("end", message + "\n")
+            self.log_text.configure(state="disabled")
+            self.log_text.see("end")
+
+    def show_log(self):
+        if hasattr(self, 'log_window') and self.log_window and self.log_window.winfo_exists():
+            self.log_window.lift()
+            return
+
+        self.log_window = tk.Toplevel(self)
+        self.log_window.title("Log Output")
+        self.log_window.geometry("600x300")
+
+        # === Top Frame for Clear Button ===
+        top_button_frame = tk.Frame(self.log_window)
+        top_button_frame.pack(fill="x", padx=5, pady=5)
+
+        clear_button = tk.Button(top_button_frame, text="Clear Log", command=self.clear_log)
+        clear_button.pack(side="left")
+
+        # === Frame for log + scrollbar ===
+        frame = tk.Frame(self.log_window)
+        frame.pack(fill="both", expand=True)
+
+        self.log_text = tk.Text(frame, wrap="word", state="disabled", background="#f0f0f0")
+        scrollbar = tk.Scrollbar(frame, command=self.log_text.yview)
+        self.log_text.configure(yscrollcommand=scrollbar.set)
+
+        self.log_text.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+
+        # === Fill from buffer ===
+        self.log_text.configure(state="normal")
+        self.log_text.delete("1.0", "end")
+        for line in self.log_buffer:
+            self.log_text.insert("end", line + "\n")
+        self.log_text.configure(state="disabled")
+        self.log_text.see("end")
+
+    def clear_log(self):
+        self.log_buffer = []
+        if self.log_text and self.log_text.winfo_exists():
+            self.log_text.configure(state="normal")
+            self.log_text.delete("1.0", "end")
+            self.log_text.configure(state="disabled")
+
+    def write(self, message):
+        self.log_message(message)
+
+    def flush(self):
+        pass  # Required for compatibility
+
+    def handle_exception(self, exc_type, exc_value, exc_traceback):
+        if issubclass(exc_type, KeyboardInterrupt):
+            sys.__excepthook__(exc_type, exc_value, exc_traceback)
+            return
+        traceback_text = ''.join(traceback.format_exception(exc_type, exc_value, exc_traceback))
+        print("Uncaught exception:\n" + traceback_text)
 
 def load_help_content():
 

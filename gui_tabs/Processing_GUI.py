@@ -582,7 +582,7 @@ class processingGUI(ttk.Frame):
             self.log_text.insert(tk.END, f"{i}. Running: {script_name}\n")
             self.log_text.see(tk.END)
             
-            process = subprocess.run(["python", script_path, output_file, *dataset_paths], capture_output=True, text=True, check=True)
+            process = subprocess.run(["python", os.path.join(SCRIPT_DIRECTORY, script_path), output_file, *dataset_paths], capture_output=True, text=True, check=True)
             self.log_text.insert(tk.END, process.stdout + "\n" + process.stderr + "\n")
             self.log_text.see(tk.END)
             
