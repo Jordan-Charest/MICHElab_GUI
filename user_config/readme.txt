@@ -1,1 +1,1 @@
-the fiji_config.json file will appear here when ROI_selection.py is run for the first time. Make sure the contents of this folder are added to .gitignore.
+the fiji_config.json file will appear here when ROI_selection.py is run for the first time. Make sure the contents of this folder (except the readme) are added to .gitignore.
