@@ -1,8 +1,6 @@
-import copy
-import scipy as sp
+import numpy as np
 import tifffile
 from utils.hdf5 import create_hdf5, add_data_to_hdf5, print_hdf5_structure
-from toolbox_jocha.mouse_data import *
 import os
 
 """From .tif and .npy files containing signals such as GCaMP, HbT, pupillometry and others, generates a HDF5 data file.

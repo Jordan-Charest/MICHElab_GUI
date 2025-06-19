@@ -4,9 +4,9 @@ from tkinter import ttk, messagebox
 import matplotlib.pyplot as plt
 import sys
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from toolbox_jocha.hdf5 import get_data_from_dataset, save_data_to_dataset
-from toolbox_jocha.detrending import compute_dff_using_minfilter
-from toolbox_jocha.parsing import parse_key_value_args
+from utils.hdf5 import get_data_from_dataset, save_data_to_dataset
+from utils.detrending import compute_dff_using_minfilter
+from utils.parsing import parse_key_value_args
 
 def detrend_data(filename, dataset_path, window=60, sigma1=1, sigma2=10, offset=0):
 

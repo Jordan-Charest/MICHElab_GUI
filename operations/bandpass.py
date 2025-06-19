@@ -4,9 +4,9 @@ from tkinter import ttk, messagebox
 import matplotlib.pyplot as plt
 import sys
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from toolbox_jocha.hdf5 import get_data_from_dataset, save_data_to_dataset
+from utils.hdf5 import get_data_from_dataset, save_data_to_dataset
 from scipy.signal import butter, filtfilt
-from toolbox_jocha.parsing import parse_key_value_args
+from utils.parsing import parse_key_value_args
 
 def bandpass_filter(filename, dataset_path, lowcut, highcut, method="butter", order=3):
     data, attributes = get_data_from_dataset(filename, dataset_path)

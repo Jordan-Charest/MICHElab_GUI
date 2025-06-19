@@ -562,40 +562,52 @@ class processingGUI(ttk.Frame):
 
     
     def run_processing(self):
-        """Once the dataset and the scripts are selected, launch processing
-        """
+        """Once the dataset and the scripts are selected, launch processing"""
 
         input_file = self.input_entry.get()
         output_file = input_file if self.process_without_copy_var.get() else self.output_entry.get()
         selected_datasets = self.dataset_tree.selection()
+        
         if not input_file or not output_file or not selected_datasets or not self.selected_script_order:
+            print("Missing input, output, selected datasets, or scripts.")
             return
-        
+
         if not self.process_without_copy_var.get():
-            self.log_text.insert(tk.END, "Copying original data.\n\n")
-            self.log_text.see(tk.END)
+            print("Copying original data.\n")
             shutil.copy(input_file, output_file)
-        
+
         dataset_paths = list(selected_datasets)
+        
         for i, script_path in enumerate(self.selected_script_order, start=1):
             script_name = os.path.basename(script_path)
-            self.log_text.insert(tk.END, f"{i}. Running: {script_name}\n")
-            self.log_text.see(tk.END)
-            
-            process = subprocess.run(["python", os.path.join(SCRIPT_DIRECTORY, script_path), output_file, *dataset_paths], capture_output=True, text=True, check=True)
-            self.log_text.insert(tk.END, process.stdout + "\n" + process.stderr + "\n")
-            self.log_text.see(tk.END)
-            
+            print(f"{i}. Running: {script_name}")
+
+            try:
+                command = ["python", os.path.join(SCRIPT_DIRECTORY, script_path), output_file, *dataset_paths]
+                process = subprocess.run(
+                    command,
+                    capture_output=True,
+                    text=True,
+                    check=True
+                )
+                print(process.stdout)
+                print(process.stderr)
+
+            except subprocess.CalledProcessError as e:
+                print("ERROR: Script failed.")
+                print("Command:", e.cmd)
+                print("Exit code:", e.returncode)
+                print("STDOUT:\n" + e.stdout)
+                print("STDERR:\n" + e.stderr)
+                return  # Stop processing on first failure
+
             # Ensure HDF5 changes are fully written and reloaded
             with h5py.File(output_file, 'r+') as f:
                 f.flush()
 
-            # Reload
             self.browse_file(filename=self.filename)
 
-        
-        self.log_text.insert(tk.END, "Finished!")
-        self.log_text.see(tk.END)
+        print("Finished!")
 
 
 # if __name__ == "__main__":

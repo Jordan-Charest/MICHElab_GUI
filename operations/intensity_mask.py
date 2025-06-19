@@ -4,8 +4,8 @@ from tkinter import ttk, messagebox
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from scipy.ndimage import binary_dilation
-from toolbox_jocha.hdf5 import get_data_from_dataset, save_data_to_dataset
-from toolbox_jocha.parsing import parse_key_value_args
+from utils.hdf5 import get_data_from_dataset, save_data_to_dataset
+from utils.parsing import parse_key_value_args
 import sys
 
 def intensity_mask_to_data(filename, dataset_paths, mask_path, threshold=0.1, dilation=0, copy_name=None):

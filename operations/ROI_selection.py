@@ -1,23 +1,18 @@
 import numpy as np
-import h5py
 import subprocess
 import tkinter as tk
-from tkinter import filedialog, ttk, messagebox
-from toolbox_jocha.hdf5 import get_data_from_dataset, save_data_to_dataset
+from tkinter import filedialog, ttk
+from utils.hdf5 import get_data_from_dataset, save_data_to_dataset
 import tifffile
-import imageio
-import tempfile
 from tempfile import NamedTemporaryFile
 import os
 from pathlib import Path
 import sys
 
-# prefix = "../" # Use when launching as a standalone script
-prefix = "" # Use when launching from the GUI launcher
-
-macro_path = prefix+"FIJI_macros/macro_launch.ijm"
-ROI_macro_path = prefix+"FIJI_macros/ROI.ijm"
-fiji_path = prefix+"../../FIJI_local/Fiji.app/ImageJ-win64.exe"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MACRO_DIR = os.path.join(BASE_DIR, "FIJI_macros/macro_launch.ijm")
+ROI_MACRO_DIR = os.path.join(BASE_DIR, "FIJI_macros/ROI.ijm")
+FIJI_DIR = os.path.join(BASE_DIR, "Fiji.app/ImageJ-win64.exe")
 
 def apply_roi_mask(filename, dataset_paths, mask, make_copy, copy_name, invert_mask, invert_copy_name):
     for dataset_path in dataset_paths:
@@ -64,7 +59,7 @@ def apply_roi_mask(filename, dataset_paths, mask, make_copy, copy_name, invert_m
 def get_roi_mask_from_fiji(macro_path, temp_tif_path):
     # Run the FIJI macro
     result = subprocess.run(
-        [fiji_path, "--run", macro_path],
+        [FIJI_DIR, "--run", macro_path],
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,  # merge stderr into stdout
         text=True
@@ -149,7 +144,7 @@ if __name__ == "__main__":
         temp_ROI_tif_path = Path(temp_tif.name).resolve()
 
     # Modify and create temporary ROI macro file
-    with open(ROI_macro_path, "r") as temp_macro:
+    with open(ROI_MACRO_DIR, "r") as temp_macro:
         macro_content = temp_macro.read().replace("<output_path>", temp_ROI_tif_path.as_posix())
 
     with NamedTemporaryFile(delete=False, suffix=".ijm", mode="w") as temp_macro_file:
@@ -157,7 +152,7 @@ if __name__ == "__main__":
         temp_ROI_macro_path = Path(temp_macro_file.name).resolve()
 
     # Modify and create the launching macro file
-    with open(macro_path, "r") as temp_macro:
+    with open(MACRO_DIR, "r") as temp_macro:
         macro_content = temp_macro.read() \
             .replace("<stack_path>", image_path.as_posix()) \
             .replace("<macro_path>", temp_ROI_macro_path.as_posix())

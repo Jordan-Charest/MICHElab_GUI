@@ -348,7 +348,7 @@ class compute_DimRedGUI(ttk.Frame):
             if elements_mask is not None:
                 pca_to_save["elements_mask"] = elements_mask
             if window_shape is not None:
-                umap_to_save["shape"] = window_shape
+                pca_to_save["shape"] = window_shape
 
             merge_dictionaries(to_save, pca_to_save)
 

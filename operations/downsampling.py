@@ -1,8 +1,8 @@
 import numpy as np
-from toolbox_jocha.hdf5 import get_data_from_dataset, save_data_to_dataset, parameter_GUI, log
+from utils.hdf5 import get_data_from_dataset, save_data_to_dataset, parameter_GUI, log
 import warnings
 import sys
-from toolbox_jocha.parsing import parse_key_value_args
+from utils.parsing import parse_key_value_args
 
 warnings.filterwarnings('ignore')
 
