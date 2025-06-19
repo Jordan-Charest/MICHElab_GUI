@@ -11,12 +11,14 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import numba as nb
 import numpy as np
 import tifffile
+from pathlib import Path
 
 from utils.hdf5 import get_data_from_dataset, delete_hdf5_dataset, add_data_to_hdf5
 
 VALID_EXTENSIONS = [("Numpy or TIFF", "*.npy *.tif *.tiff")] # For adding datasets to existing HDF5 file
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-SCRIPT_DIRECTORY = os.path.join(BASE_DIR, "../operations") # Where the operations scripts are situated
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+SCRIPT_DIRECTORY = PROJECT_ROOT / "operations"
 
 @nb.njit(parallel=True)
 def compute_seedbased(data, x, y):
@@ -583,12 +585,24 @@ class processingGUI(ttk.Frame):
             print(f"{i}. Running: {script_name}")
 
             try:
-                command = ["python", os.path.join(SCRIPT_DIRECTORY, script_path), output_file, *dataset_paths]
+                # 1. Get full path to script
+                full_script_path = Path(SCRIPT_DIRECTORY) / script_path
+
+                # 2. Convert to Python module path, e.g. "operations.ROI_selection"
+                # script_path is something like "ROI_selection.py"
+                full_script_path = SCRIPT_DIRECTORY / script_path
+
+                # Convert to module path like "operations.ROI_selection"
+                module_path = full_script_path.with_suffix('').relative_to(PROJECT_ROOT).as_posix().replace('/', '.')
+
+                # 3. Launch with -m
+                command = ["python", "-m", module_path, output_file, *dataset_paths]
                 process = subprocess.run(
                     command,
                     capture_output=True,
                     text=True,
-                    check=True
+                    check=True,
+                    cwd=PROJECT_ROOT  # Key: ensure relative import roots are correct
                 )
                 print(process.stdout)
                 print(process.stderr)

@@ -1,18 +1,58 @@
 import numpy as np
 import subprocess
 import tkinter as tk
-from tkinter import filedialog, ttk
+from tkinter import filedialog, ttk, messagebox
 from utils.hdf5 import get_data_from_dataset, save_data_to_dataset
 import tifffile
 from tempfile import NamedTemporaryFile
 import os
 from pathlib import Path
 import sys
+import json
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MACRO_DIR = os.path.join(BASE_DIR, "FIJI_macros/macro_launch.ijm")
 ROI_MACRO_DIR = os.path.join(BASE_DIR, "FIJI_macros/ROI.ijm")
-FIJI_DIR = os.path.join(BASE_DIR, "Fiji.app/ImageJ-win64.exe")
+CONFIG_FILE = Path(__file__).parent / "fiji_config.json"
+
+CONFIG_DIR = Path(__file__).resolve().parent.parent / "user_config"
+CONFIG_DIR.mkdir(exist_ok=True)
+CONFIG_FILE = CONFIG_DIR / "fiji_config.json"
+
+def get_fiji_executable():
+    """Load Fiji executable path from config, or prompt the user."""
+    if CONFIG_FILE.exists():
+        try:
+            with open(CONFIG_FILE, 'r') as f:
+                config = json.load(f)
+                fiji_path = Path(config.get("fiji_path", ""))
+                if fiji_path.exists():
+                    return fiji_path
+        except json.JSONDecodeError:
+            print("Warning: Corrupted config file. Re-selecting Fiji path...")
+
+    # Prompt user to select Fiji executable
+    root = tk.Tk()
+    root.withdraw()
+    messagebox.showinfo("Select Fiji", "Please select your Fiji executable (e.g., fiji-windows-x64.exe)")
+    fiji_path = filedialog.askopenfilename(
+        title="Select Fiji Executable",
+        filetypes=[("Fiji Executable", "*.exe" if os.name == "nt" else "*")]
+    )
+    root.destroy()
+
+    if not fiji_path:
+        raise RuntimeError("Fiji path not provided. Script aborted.")
+
+    fiji_path = Path(fiji_path)
+
+    with open(CONFIG_FILE, 'w') as f:
+        json.dump({"fiji_path": str(fiji_path)}, f)
+
+    return fiji_path
+
+FIJI_PATH = get_fiji_executable()
+
 
 def apply_roi_mask(filename, dataset_paths, mask, make_copy, copy_name, invert_mask, invert_copy_name):
     for dataset_path in dataset_paths:
@@ -59,11 +99,19 @@ def apply_roi_mask(filename, dataset_paths, mask, make_copy, copy_name, invert_m
 def get_roi_mask_from_fiji(macro_path, temp_tif_path):
     # Run the FIJI macro
     result = subprocess.run(
-        [FIJI_DIR, "--run", macro_path],
+        [str(FIJI_PATH), "--run", macro_path],
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,  # merge stderr into stdout
         text=True
     )
+    print("FIJI output:")
+    print(result.stdout)
+
+    if result.returncode != 0:
+        raise RuntimeError(f"FIJI macro failed with return code {result.returncode}")
+
+    if not temp_tif_path.exists() or temp_tif_path.stat().st_size == 0:
+        raise FileNotFoundError(f"Expected ROI TIFF file not found or empty: {temp_tif_path}")
 
     # The macro will save the mask to a temporary TIFF file, which is passed through <output_path>
     # Read the mask from the saved TIFF file

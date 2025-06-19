@@ -11,6 +11,7 @@ from PIL import Image, ImageTk
 import os
 import sys
 import traceback
+from pathlib import Path
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 HELP_TEXT_DIR = os.path.join(BASE_DIR, "help/text")
