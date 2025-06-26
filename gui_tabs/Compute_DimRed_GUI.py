@@ -38,8 +38,8 @@ class compute_DimRedGUI(ttk.Frame):
         self.create_widgets()
 
         # Redirect stdout to the console text widget
-        self.original_stdout = sys.stdout
-        sys.stdout = ConsoleRedirector(self.console_text)
+        # self.original_stdout = sys.stdout
+        # sys.stdout = ConsoleRedirector(self.console_text)
 
         # Update scroll region when the main_frame (content inside canvas) size changes
         self.main_frame.bind("<Configure>", self.on_frame_configure)
@@ -141,15 +141,15 @@ class compute_DimRedGUI(ttk.Frame):
         run_button.pack(pady=10)
 
         # --- Console Box ---
-        console_frame = ttk.LabelFrame(self.main_frame, text="Console Output")
-        console_frame.pack(padx=10, pady=5, fill="both", expand=True)
+        # console_frame = ttk.LabelFrame(self.main_frame, text="Console Output")
+        # console_frame.pack(padx=10, pady=5, fill="both", expand=True)
 
-        self.console_text = tk.Text(console_frame, wrap="word", height=10, state="disabled")
-        self.console_text.pack(side="left", fill="both", expand=True)
+        # self.console_text = tk.Text(console_frame, wrap="word", height=10, state="disabled")
+        # self.console_text.pack(side="left", fill="both", expand=True)
 
-        console_scrollbar = ttk.Scrollbar(console_frame, command=self.console_text.yview)
-        console_scrollbar.pack(side="right", fill="y")
-        self.console_text.config(yscrollcommand=console_scrollbar.set)
+        # console_scrollbar = ttk.Scrollbar(console_frame, command=self.console_text.yview)
+        # console_scrollbar.pack(side="right", fill="y")
+        # self.console_text.config(yscrollcommand=console_scrollbar.set)
 
     def add_entry_field(self, parent_frame, entry_list):
         entry = tk.Entry(parent_frame, width=40) # Set a fixed width for Entry widgets
@@ -257,12 +257,11 @@ class compute_DimRedGUI(ttk.Frame):
     def browse_output_folder(self):
         folder_selected = filedialog.askdirectory()
         if folder_selected:
-            output_path = f"{folder_selected}/output_dimres.pkl"
+            output_path = f"{folder_selected}/output_dimred.pkl"
             self.output_filepath_entry.delete(0, tk.END)
             self.output_filepath_entry.insert(0, output_path)
 
     def run_process(self):
-        self.clear_console()
         print(f"[{self.current_time()}] Starting.")
 
         # Collect filepaths
@@ -366,10 +365,6 @@ class compute_DimRedGUI(ttk.Frame):
         print(f"[{self.current_time()}] PCA selection: {pca_selected}")
         print(f"[{self.current_time()}] Output File: {output_file}")
 
-    def clear_console(self):
-        self.console_text.config(state="normal")
-        self.console_text.delete(1.0, tk.END)
-        self.console_text.config(state="disabled")
 
     def update_scroll_region(self):
         # This function updates the scrollable area of the canvas.

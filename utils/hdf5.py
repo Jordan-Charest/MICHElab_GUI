@@ -60,7 +60,7 @@ def add_data_to_hdf5(filename, dataset_name, dataset, group_path, attributes=Non
             for key, value in attributes.items():
                 dset.attrs[key] = value
 
-def add_attributes_to_dataset(filepath, dataset_path, attributes):
+def add_attributes_to_dataset(filepath, dataset_path, attributes, log_flag=False):
     """
     Adds attributes to an existing dataset in an HDF5 file.
 
@@ -77,7 +77,8 @@ def add_attributes_to_dataset(filepath, dataset_path, attributes):
             dataset = f[dataset_path]
             for key, value in attributes.items():
                 dataset.attrs[key] = value
-            print(f"Attributes added to dataset '{dataset_path}': {attributes}")
+            if log_flag:
+                print(f"Attributes added to dataset '{dataset_path}': {attributes}")
         else:
             raise KeyError(f"Dataset '{dataset_path}' not found in file.")
         

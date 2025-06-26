@@ -95,25 +95,25 @@ class processingGUI(ttk.Frame):
     def create_widgets(self):
         
         # FILE SELECTOR
-        tk.Label(self, text="Input File:").pack()
-        input_frame = tk.Frame(self)
+        ttk.Label(self, text="Input File:").pack()
+        input_frame = ttk.Frame(self)
         input_frame.pack()
-        self.input_entry = tk.Entry(input_frame, width=50)
+        self.input_entry = ttk.Entry(input_frame, width=50)
         self.input_entry.pack(side=tk.LEFT)
-        tk.Button(input_frame, text="Browse", command=lambda: self.browse_file()).pack(side=tk.RIGHT)
+        ttk.Button(input_frame, text="Browse", command=lambda: self.browse_file()).pack(side=tk.RIGHT)
         
         # PROCESS WITHOUT COPY CHECKBOX
         self.process_without_copy_var = tk.BooleanVar()
-        process_without_copy_checkbox = tk.Checkbutton(self, text="Process without copy", variable=self.process_without_copy_var, command=self.toggle_output_entry)
+        process_without_copy_checkbox = ttk.Checkbutton(self, text="Process without copy", variable=self.process_without_copy_var, command=self.toggle_output_entry)
         process_without_copy_checkbox.pack()
         
         # OUTPUT FILE FIELD
-        tk.Label(self, text="Output File:").pack()
-        self.output_entry = tk.Entry(self, width=50)
+        ttk.Label(self, text="Output File:").pack()
+        self.output_entry = ttk.Entry(self, width=50)
         self.output_entry.pack()
         
         # DATASET EXPLORATION TABLE
-        dataset_frame = tk.Frame(self)
+        dataset_frame = ttk.Frame(self)
         dataset_frame.pack()
         self.dataset_tree = ttk.Treeview(dataset_frame, columns=("Shape", "Type"), show="tree headings", height=5)
         self.dataset_tree.heading("#0", text="Dataset Path")
@@ -127,14 +127,14 @@ class processingGUI(ttk.Frame):
         self.attributes_text.pack(side=tk.RIGHT)
 
         # ADD OR DELETE DATASETS BUTTONS
-        button_frame = tk.Frame(self)
+        button_frame = ttk.Frame(self)
         button_frame.pack(pady=5)
-        tk.Button(button_frame, text="Add Dataset", command=self.open_add_dataset_dialog).pack(side=tk.LEFT, padx=5)
-        tk.Button(button_frame, text="Delete Dataset", command=self.delete_selected_dataset).pack(side=tk.LEFT, padx=5)
+        ttk.Button(button_frame, text="Add Dataset", command=self.open_add_dataset_dialog).pack(side=tk.LEFT, padx=5)
+        ttk.Button(button_frame, text="Delete Dataset", command=self.delete_selected_dataset).pack(side=tk.LEFT, padx=5)
         
         # PROCESSING SCRIPTS DISPLAY
-        tk.Label(self, text="Processing Scripts:").pack()
-        script_frame = tk.Frame(self)
+        ttk.Label(self, text="Processing Scripts:").pack()
+        script_frame = ttk.Frame(self)
         script_frame.pack()
         self.order_listbox = tk.Listbox(script_frame, width=70, height=5)
         self.order_listbox.pack(side=tk.RIGHT, padx=10)
@@ -144,36 +144,36 @@ class processingGUI(ttk.Frame):
         self.load_scripts()
         
         # PREVIEW BUTTON
-        preview_button_frame = tk.Frame(self)
+        preview_button_frame = ttk.Frame(self)
         preview_button_frame.pack()
-        preview_button = tk.Button(preview_button_frame, text="Preview", command=self.on_preview_button_click)
+        preview_button = ttk.Button(preview_button_frame, text="Preview", command=self.on_preview_button_click)
         preview_button.pack(side=tk.LEFT)
 
         # SEED BASED CORRELATION BUTTON
-        seedbased_btn = tk.Button(preview_button_frame, text="Seed Based Correlation", command=self.on_seedbased)
+        seedbased_btn = ttk.Button(preview_button_frame, text="Seed Based Correlation", command=self.on_seedbased)
         seedbased_btn.pack(side=tk.LEFT)
         
         # COLORMAP CHECKBOXES
         self.colormap_var = tk.IntVar(value=1)
-        colormap_frame = tk.Frame(self)
+        colormap_frame = ttk.Frame(self)
         colormap_frame.pack()
-        tk.Checkbutton(colormap_frame, text="Viridis", variable=self.colormap_var, onvalue=1, offvalue=0).pack(side=tk.LEFT)
-        tk.Checkbutton(colormap_frame, text="Coolwarm", variable=self.colormap_var, onvalue=0, offvalue=1).pack(side=tk.LEFT)
+        ttk.Checkbutton(colormap_frame, text="Viridis", variable=self.colormap_var, onvalue=1, offvalue=0).pack(side=tk.LEFT)
+        ttk.Checkbutton(colormap_frame, text="Coolwarm", variable=self.colormap_var, onvalue=0, offvalue=1).pack(side=tk.LEFT)
         
         # TIMECOURSE AND POWER SPECTRUM DENSITY CHECKBUTTONS
         self.timecourse_var = tk.BooleanVar(value=False)  # Default to unchecked
         self.psd_var = tk.BooleanVar(value=False)  # Default to unchecked
 
         # Create the frame for the timecourse and PSD checkbuttons
-        tc_psd_frame = tk.Frame(self)
+        tc_psd_frame = ttk.Frame(self)
         tc_psd_frame.pack()
 
         # Timecourse checkbutton
-        timecourse_cb = tk.Checkbutton(tc_psd_frame, text="1D Timecourse from 3D data", variable=self.timecourse_var, command=lambda: handle_check(self.timecourse_var, self.psd_var))
+        timecourse_cb = ttk.Checkbutton(tc_psd_frame, text="1D Timecourse from 3D data", variable=self.timecourse_var, command=lambda: handle_check(self.timecourse_var, self.psd_var))
         timecourse_cb.pack(side=tk.LEFT)
 
         # Power Spectrum Density checkbutton
-        psd_cb = tk.Checkbutton(tc_psd_frame, text="Power Spectrum Density", variable=self.psd_var, command=lambda: handle_check(self.psd_var, self.timecourse_var))
+        psd_cb = ttk.Checkbutton(tc_psd_frame, text="Power Spectrum Density", variable=self.psd_var, command=lambda: handle_check(self.psd_var, self.timecourse_var))
         psd_cb.pack(side=tk.LEFT)
 
         # Custom function to enforce mutual exclusivity
@@ -184,10 +184,29 @@ class processingGUI(ttk.Frame):
                 # If both are unchecked, do nothing or apply other logic as needed
                 pass
         
-        self.log_text = tk.Text(self, width=80, height=5, state=tk.NORMAL)
-        self.log_text.pack()
+        # self.log_text = tk.Text(self, width=80, height=5, state=tk.NORMAL)
+        # self.log_text.pack()
         
-        tk.Button(self, text="Run Processing", command=self.run_processing).pack()
+        run_frame = ttk.Frame(self)
+        run_frame.pack()
+        ttk.Button(run_frame, text="Run Processing", command=self.run_processing).pack(side=tk.LEFT, padx=5)
+        ttk.Button(run_frame, text="Repack HDF5", command=self.repack_hdf5).pack(side=tk.LEFT, padx=5)
+
+    def repack_hdf5(self):
+        input_path = self.input_entry.get()
+        output_path = self.input_entry.get()[:-3] + "_repacked.h5"
+        try:
+            result = subprocess.run(
+                ["h5repack", input_path, output_path],
+                check=True,
+                capture_output=True,
+                text=True
+            )
+            print(f"Repack successful under filename {output_path}:")
+            print(result.stdout)
+        except subprocess.CalledProcessError as e:
+            print("Repack failed:")
+            print(e.stderr)
 
 
     def browse_file(self, filename=None):

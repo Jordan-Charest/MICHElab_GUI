@@ -1,6 +1,6 @@
 import os
 import tkinter as tk
-from tkinter import filedialog, StringVar, DoubleVar
+from tkinter import filedialog, StringVar
 from tkinter import ttk
 from utils.hdf5 import create_hdf5, add_data_to_hdf5
 from utils.other import merge_dictionaries

@@ -31,7 +31,19 @@ def average_3d_to_1d(signal, time_axis=0):
 
     return signal_1d
 
+def plot_first_frame(data, cmap="viridis", title="", savepath=None, noshow=False):
+    
+    fig, ax = plt.subplots(1, 1)
+    if data.ndim == 3:
+        im = ax.imshow(data[0,:,:], cmap=cmap)
+    elif data.ndim == 2:
+        im = ax.imshow(data[:,:], cmap=cmap)
+    cbar = fig.colorbar(im, ax=ax, orientation='vertical')
+    plt.title(title)
 
+    if savepath is not None:
+        plt.savefig(savepath)
+    if not noshow: plt.show()
 
 
 def center_mean(signal, strictly_positive=True, center_loc=1):
