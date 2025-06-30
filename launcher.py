@@ -1,8 +1,9 @@
 
-from gui_tabs.Visualize_DimRed_GUI import visualize_DimRedGUI
-from gui_tabs.Compute_DimRed_GUI import compute_DimRedGUI
-from gui_tabs.Processing_GUI import processingGUI
-from gui_tabs.Create_HDF5_dataset_GUI import create_HDF5_dataset_GUI
+import gui_tabs.Visualize_DimRed_GUI
+import gui_tabs.Compute_DimRed_GUI
+import gui_tabs.Processing_GUI
+import gui_tabs.Create_HDF5_dataset_GUI
+import gui_tabs.dfc_GUI
 
 from tkinter import ttk
 import tkinter as tk
@@ -12,6 +13,8 @@ import os
 import sys
 import traceback
 from pathlib import Path
+
+import importlib
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 HELP_TEXT_DIR = os.path.join(BASE_DIR, "help/text")
@@ -31,6 +34,10 @@ class Launcher(tk.Tk):
         self.help_button = tk.Button(top_frame, text="Help", command=self.show_help)
         self.help_button.pack(side="right", padx=10, pady=1)
 
+        # Reload code and tabs
+        self.reload_button = tk.Button(top_frame, text="Reload Tabs", command=self.reload_tabs)
+        self.reload_button.pack(side="right", padx=10, pady=1)
+
         # For logging purposes
         self.log_buffer = []
 
@@ -42,15 +49,7 @@ class Launcher(tk.Tk):
 
         self.help_content = load_help_content()
 
-        visualize_dimred = visualize_DimRedGUI(self.notebook)
-        compute_dimred = compute_DimRedGUI(self.notebook)
-        processing = processingGUI(self.notebook)
-        create_HDF5 = create_HDF5_dataset_GUI(self.notebook)
-
-        self.notebook.add(create_HDF5, text="Create HDF5")
-        self.notebook.add(processing, text="HDF5 processing")
-        self.notebook.add(visualize_dimred, text="Preview dim. red.")
-        self.notebook.add(compute_dimred, text="Compute dim. red.")
+        self.init_tabs()
 
         # Track tab changes
         self.current_tab_name = self.notebook.tab(self.notebook.select(), "text")
@@ -171,6 +170,36 @@ class Launcher(tk.Tk):
             return
         traceback_text = ''.join(traceback.format_exception(exc_type, exc_value, exc_traceback))
         print("Uncaught exception:\n" + traceback_text)
+
+    def reload_tabs(self):
+        print("Reloading tabs...")
+
+        # Step 1: Reload source modules
+        importlib.reload(gui_tabs.Create_HDF5_dataset_GUI)
+        importlib.reload(gui_tabs.Processing_GUI)
+        importlib.reload(gui_tabs.Visualize_DimRed_GUI)
+        importlib.reload(gui_tabs.Compute_DimRed_GUI)
+        importlib.reload(gui_tabs.dfc_GUI)
+
+        self.init_tabs()
+
+    def init_tabs(self):
+        # Clear existing tabs if reloading
+        for tab in self.notebook.winfo_children():
+            tab.destroy()
+
+        # IMPORTANT: don't forget to update the reload_tabs method as well!
+        visualize_dimred = gui_tabs.Visualize_DimRed_GUI.visualize_DimRedGUI(self.notebook)
+        compute_dimred = gui_tabs.Compute_DimRed_GUI.compute_DimRedGUI(self.notebook)
+        processing = gui_tabs.Processing_GUI.processingGUI(self.notebook)
+        create_HDF5 = gui_tabs.Create_HDF5_dataset_GUI.create_HDF5_dataset_GUI(self.notebook)
+        dfc = gui_tabs.dfc_GUI.dfcGUI(self.notebook)
+
+        self.notebook.add(create_HDF5, text="Create HDF5")
+        self.notebook.add(processing, text="HDF5 processing")
+        self.notebook.add(visualize_dimred, text="Preview dim. red.")
+        self.notebook.add(compute_dimred, text="Compute dim. red.")
+        self.notebook.add(dfc, text="Compute dFC")
 
 def load_help_content():
 
