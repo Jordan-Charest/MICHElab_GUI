@@ -63,7 +63,7 @@ def apply_filter_to_data(filename, dataset_paths, lowcut, highcut, method="butte
     
         data, attributes = bandpass_filter(filename, dataset_path, lowcut, highcut, method=method, order=order)
 
-        attributes.update({"bandpass_lowcut": lowcut, "bandpass_highcut": highcut, "method": method})
+        attributes.update({"bandpass_lowcut": lowcut, "bandpass_highcut": highcut, "bandpass_method": method})
         if method == "butter": attributes.update({"order": order})
 
         if copy_name is None:

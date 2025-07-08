@@ -8,8 +8,9 @@ from utils.hdf5 import get_data_from_dataset
 from utils.ets import format_array
 from utils.community_detection import communities_to_window
 from utils.correlation import compute_correlation_map
-from sklearn.cluster import HDBSCAN
+from sklearn.cluster import HDBSCAN, KMeans
 from matplotlib.colors import ListedColormap, BoundaryNorm
+import os
 
 class visualize_DimRedGUI(ttk.Frame):
     """
@@ -328,11 +329,7 @@ class visualize_DimRedGUI(ttk.Frame):
             return
 
         # Instantiate the new PreviewWindow class
-        # Removed preview_window.wait_window() to make it non-modal
         preview_window = PreviewWindow(self, model, h5_filepath, h5_dataset, window_title)
-        # The line below is no longer needed because wait_window() is removed.
-        # The main loop continues running, allowing multiple windows.
-        # preview_window.wait_window()
 
     def _open_loadings_wrapper(self):
         # Retrieve actual values from your main GUI
@@ -381,6 +378,7 @@ class PreviewWindow(tk.Toplevel):
 
 
         # Store arguments and initialized data as instance attributes
+        self.model_filepath = parent.model_filepath.get()
         self.model = parent.data[parent.selected_model+"_model"]
         self.h5_filepath = parent.selected_filepath_entry.get()
         self.h5_dataset = parent.selected_dataset_entry.get()
@@ -391,13 +389,16 @@ class PreviewWindow(tk.Toplevel):
         self.scatter_plot = None
         self.canvas_widget = None
         self.colorbar_obj = None # To keep track of the colorbar for clearing
+        self.labels = None
+        self.methods_dict = {
+            "HDBSCAN": ("Min. cluster size", 20),
+            "KMeans": ("N. clusters", 4)
+        }
 
         # --- Load and transform data initially ---
         try:
             self.raw_data = self._load_h5_data(self.h5_filepath, self.h5_dataset)
 
-            # Placeholder for model.transform(raw_data)
-            # In your actual code: preview_window.transformed_data = model.transform(preview_window.raw_data)
             self.transformed_data = self._transform_h5_data(self.model, self.raw_data)
 
             if self.transformed_data.ndim < 2:
@@ -415,7 +416,6 @@ class PreviewWindow(tk.Toplevel):
 
     def _on_close(self):
         """Handles the closing of the preview window."""
-        # Removed self.grab_release() as grab_set() is removed
         self.destroy()
 
     def _create_widgets(self, window_title):
@@ -482,38 +482,45 @@ class PreviewWindow(tk.Toplevel):
         y_comp_entry.pack(side="right", expand=True, fill="x")
 
         # --- Clustering Section ---
-        clustering_label = ttk.Label(controls_frame, text="Other options", font="-weight bold")
+        clustering_label = ttk.Label(controls_frame, text="Other:", font="-weight bold")
         clustering_label.pack(pady=(10, 0), anchor="w")
 
-        # Create a subframe for checkbox and entry side-by-side
-        hdbscan_frame = ttk.Frame(controls_frame)
-        hdbscan_frame.pack(fill="x", padx=10, pady=5)
+        clustering_frame = ttk.Frame(controls_frame)
+        clustering_frame.pack(fill="x", padx=10, pady=5)
 
-        # Checkbox
-        self.clustering_var = tk.BooleanVar(value=False)
-        def toggle_entry_state():
-            if self.clustering_var.get():
-                cluster_size_entry.state(["!disabled"])
-            else:
-                cluster_size_entry.state(["disabled"])
+        clustering_label = ttk.Label(clustering_frame, text="Clustering:")
+        clustering_label.pack(side="left", padx=(0, 10))
 
-        clustering_box = ttk.Checkbutton(
-            hdbscan_frame,
-            text="HDBSCAN clustering",
-            variable=self.clustering_var,
-            command=toggle_entry_state
+        # Dropdown options
+        clustering_options = ["None"] + list(self.methods_dict.keys())
+
+        self.clustering_method_var = tk.StringVar()
+        clustering_dropdown = ttk.Combobox(
+            clustering_frame,
+            textvariable=self.clustering_method_var,
+            values=clustering_options,
+            state="readonly"
         )
-        clustering_box.pack(side="left", padx=(0, 20))
+        clustering_dropdown.current(0)  # Default to "None"
+        clustering_dropdown.pack(side="left", fill="x", expand=True)
 
-        # Frame for label + entry
-        entry_frame = ttk.Frame(hdbscan_frame)
-        entry_frame.pack(side="left", fill="x", expand=True)
+        # Entry section (label + entry)
+        entry_frame = ttk.Frame(controls_frame)
+        entry_frame.pack(fill="x", padx=10, pady=10)
 
-        ttk.Label(entry_frame, text="Min. cluster size").pack(anchor="w")
-        self.cluster_size_var = tk.IntVar(value=20)
-        cluster_size_entry = ttk.Entry(entry_frame, textvariable=self.cluster_size_var, width=10)
-        cluster_size_entry.pack(anchor="w")
-        cluster_size_entry.state(["disabled"])  # Initially disabled
+        self.clustering_param_label = ttk.Label(entry_frame, text="Clustering param")
+        self.clustering_param_label.pack(anchor="w")
+
+        self.cluster_param_var = tk.IntVar()
+        self.clustering_param_entry = ttk.Entry(entry_frame, textvariable=self.cluster_param_var, width=10)
+        self.clustering_param_entry.pack(anchor="w")
+        self.clustering_param_entry.state(["disabled"])
+
+        clustering_dropdown.bind("<<ComboboxSelected>>", self.on_clustering_method_change)
+
+        # --- Save Clustering Button ---
+        reload_button = ttk.Button(entry_frame, text="Save Clustering Labels", command=self._save_labels)
+        reload_button.pack(side="left", padx=5)
 
         # Explained variance frame
         variance_explained_frame = ttk.Frame(controls_frame)
@@ -535,6 +542,8 @@ class PreviewWindow(tk.Toplevel):
             variable=self.explained_variance_log
         )
         explained_variance_log_box.pack(side="left", padx=(0, 20))
+
+        # TODO: Make comps a spinbox instead
 
         # Frame for label + entry
         comp_frame = ttk.Frame(variance_explained_frame)
@@ -563,6 +572,18 @@ class PreviewWindow(tk.Toplevel):
 
         save_button = ttk.Button(controls_frame, text="Save Figure", command=self._save_figure)
         save_button.pack(pady=10)
+
+    def on_clustering_method_change(self, event=None):
+        method = self.clustering_method_var.get()
+
+        if method in self.methods_dict:
+            label_text, default_value = self.methods_dict[method]
+            self.clustering_param_label.config(text=label_text)
+            self.cluster_param_var.set(default_value)
+            self.clustering_param_entry.state(["!disabled"])
+        else:
+            self.clustering_param_label.config(text="Clustering param")
+            self.clustering_param_entry.state(["disabled"])
 
     def _load_h5_data(self, h5_filepath, h5_dataset):
         """
@@ -626,13 +647,18 @@ class PreviewWindow(tk.Toplevel):
         cmap = 'viridis' # Default colormap
 
         if colormap_option == "cluster":
+            # TODO: Add kmeans
             custom_colors = ["grey", "red", "blue", "green", "purple", "orange", "brown", "black"]
             label_order = [-1, 0, 1, 2, 3, 4, 5, 6]
-            hdb = HDBSCAN(min_cluster_size=int(self.cluster_size_var.get()))
-            hdb.fit(self.transformed_data[:,[x_comp,y_comp]])
-            unique_labels = np.unique(hdb.labels_).tolist()
-            # label_order = unique_labels
-            labels = hdb.labels_
+
+            # TODO: add self._perform_clustering call here to compute the labels instead
+            # hdb = HDBSCAN(min_cluster_size=int(self.cluster_size_var.get()))
+            # hdb.fit(self.transformed_data[:,[x_comp,y_comp]])
+            # unique_labels = np.unique(hdb.labels_).tolist()
+            # # label_order = unique_labels
+            # labels = hdb.labels_
+            self._perform_clustering()
+            labels = self.labels
 
             # Build colormap and norm
             cmap = ListedColormap(custom_colors)
@@ -727,6 +753,51 @@ class PreviewWindow(tk.Toplevel):
 
         self.canvas.draw_idle() # Redraw the canvas
 
+    def _perform_clustering(self):
+
+        x_comp = int(self.x_comp_var.get())
+        y_comp = int(self.y_comp_var.get())
+        method = self.clustering_method_var.get()
+
+        if method == "HDBSCAN":
+            hdb = HDBSCAN(min_cluster_size=int(self.clustering_param_entry.get()))
+            hdb.fit(self.transformed_data[:,[x_comp,y_comp]])
+            unique_labels = np.unique(hdb.labels_).tolist()
+            self.labels = hdb.labels_
+        elif method == "KMeans":
+            km = KMeans(n_clusters=int(self.clustering_param_entry.get()), n_init="auto")
+            km.fit(self.transformed_data[:,[x_comp,y_comp]])
+            self.labels = km.labels_
+
+    def _save_labels(self):
+
+        if self.clustering_method_var.get() == "None":
+            messagebox.showwarning("Error", "Please select a clustering method before saving.")
+            return
+
+        self._perform_clustering()
+
+        print(self.model_filepath)
+
+        self.append_to_pickle({"labels": self.labels, "labels_clustering_method": self.clustering_method_var.get(), "labels_clustering_param": self.clustering_param_entry.get()}, self.model_filepath)
+
+    def append_to_pickle(self, new_data: dict, filename: str):
+        """Loads an existing pickle file, updates it with new data, and saves it back."""
+        if not os.path.exists(filename):
+            raise FileNotFoundError(f"File '{filename}' does not exist. You must create it first.")
+
+        with open(filename, 'rb') as f:
+            existing_data = pickle.load(f)
+
+        if not isinstance(existing_data, dict):
+            raise ValueError("Pickle file does not contain a dictionary.")
+
+        existing_data.update(new_data)
+
+        with open(filename, 'wb') as f:
+            pickle.dump(existing_data, f)
+
+
 
 
     def _update_plot(self):
@@ -768,7 +839,7 @@ class PreviewWindow(tk.Toplevel):
 
         # --- Update plot if validation passes ---
         colormap_option = self.colormap_var.get()
-        if self.clustering_var.get():
+        if self.clustering_method_var.get() != "None":
             colormap_option = "cluster"
 
         self._plot_scatter(x_comp, y_comp, colormap_option)

@@ -226,6 +226,8 @@ class dfcGUI(ttk.Frame):
 
         print(f"Data saved to {self.output_entry.get()}.")
 
+        del data_to_save, attributes_to_save, dfc, cts
+
 @njit
 def compute_dfc_flat(signals):
     T, N = signals.shape
