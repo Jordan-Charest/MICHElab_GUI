@@ -1,0 +1,11 @@
+[1] fichier d'entrée: sélection du fichier qui contient les modèles de réduction de dimensionnalité, préalablement créés avec l'onglet Compute dim. red.
+
+[2] sélection du modèle: sélection du modèle parmi ceux se trouvant dans le fichier d'entrée.
+
+[3] attributs (métadonnées): attributs du modèle sélecitonné en [2].
+
+[4] fichiers de données à projeter: fichiers de données qu'on souhaite projeter sur le modèle sélectionné en [2].
+
+[5] jeux de données à projeter: jeux de données qu'on souhaite projeter sur le modèle sélectionné en [2].
+
+[6] lancement de la visualisation: Preview permet de projeter les données sélectionnées sur le modèle et de visualiser la trajectoire. Loadings permet de visualiser les loadings (ou équivalent) du modèle sélectionné sur la fenêtre d'imagerie.

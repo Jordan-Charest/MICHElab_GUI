@@ -21,5 +21,4 @@ Le bouton «Preview» affiche le jeu de données sélectionné: une série tempo
 La case «1D Timecourse from 3D data» permet d'afficher une série temporelle en une dimension correspondant au moyennage spatial de données en trois dimensions. La case «Power Spectrum Density» permet d'afficher la densité spectrale de données en une ou trois dimensions.
 Le bouton «Seed Based Correlation» ouvre une nouvelle fenêtre qui permet de visualiser la seed based correlation français de données en trois dimensions.
 
-[8] log et éxécution: la fenêtre comporte un log des opérations effectuées et erreurs rencontrées.
-Sous la fenêtre, le bouton «Run Processing» permet de lancer l'éxécution. Les scripts d'opération s’exécuteront sur les jeux de données sélectionnés dans 2, dans l'ordre affiché dans 6.
+[8] éxécution: le bouton «Run Processing» permet de lancer l'éxécution. Les scripts d'opération s’exécuteront sur les jeux de données sélectionnés dans 2, dans l'ordre affiché dans 6. Le bouton Repack HDF5 permet de compresser la taille du fichier HDF5 au minimum (conseillé après une série d'opérations), ce qui ne se fait pas automatiquement. Sauvegarde le fichier à taille réduite dans le même dossier.

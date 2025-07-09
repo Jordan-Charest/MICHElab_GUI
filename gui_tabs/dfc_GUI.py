@@ -66,6 +66,7 @@ class dfcGUI(ttk.Frame):
         bin_preview_frame = ttk.Frame(self)
         bin_preview_frame.pack(pady=10)
 
+
         left_frame = ttk.Frame(bin_preview_frame)
         left_frame.grid(row=0, column=0, padx=10, sticky="n")
 
@@ -86,6 +87,10 @@ class dfcGUI(ttk.Frame):
         self.y_spinbox.insert(0, "5")
 
         ttk.Button(left_frame, text="Preview Binning", command=self.preview_binning).pack(pady=5)
+        # FILE SIZE ESTIMATE
+        self.file_size_label = ttk.Label(left_frame, text="Estimated file size: xxxxxx Mb")
+        self.file_size_label.pack(pady=5)
+
         ttk.Button(left_frame, text="Compute dFC", command=self.compute_dfc).pack(pady=5)
 
         # PREVIEW PLOT
@@ -93,10 +98,6 @@ class dfcGUI(ttk.Frame):
         self.ax = self.figure.add_subplot(111)
         self.preview_canvas = FigureCanvasTkAgg(self.figure, master=bin_preview_frame)
         self.preview_canvas.get_tk_widget().grid(row=0, column=1, padx=20, sticky="n")
-
-        # FILE SIZE ESTIMATE
-        self.file_size_label = ttk.Label(self, text="Estimated file size: xxxxxx Mb")
-        self.file_size_label.pack(pady=5)
 
     def browse_file(self, filename=None):
         if filename is None:

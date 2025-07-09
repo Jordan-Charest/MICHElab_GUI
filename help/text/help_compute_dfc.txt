@@ -1,0 +1,11 @@
+[1] sélection des fichiers: sélection du fichier d'entrée (Input File) et de sortie (Output File). Les champs sont modifiables manuellement.
+
+[2] tableau de jeux de données: les datasets contenus dans le fichier HDF5 d'entrée apparaissent ici. Un seul dataset à la fois peut être sélectionné pour être traité.
+
+[3] attributs du jeu de donnée: les attributs (métadonnées) du dataset sélectionné apparaissent ici.
+
+[4] paramètres de parcellation (binning): les boîtes permettent d'entrer les dimensions souhaitées pour parceller le dataset sélectionné. Le bouton Preview Binning permet d'obtenir un aperçu de la parcellation ainsi qu'un estimé de la taille du fichier de sortie avec ces paramètres.
+
+[5] aperçu de la parcellation: l'aperçu apparaît ici après avoir appuyé sur Preview Binning.
+
+[6] bouton de lancement: appuyer sur Compute dFC lance l'opération de parcellation, ensuite le calcul de la dFC à partir du dataset sélectionné dans le fichier d'entrée, et finalement la sauvegarde de la dFC dans le fichier de sortie sélectionné.

@@ -204,20 +204,30 @@ class Launcher(tk.Tk):
 def load_help_content():
 
     help_content = {
+        "Create HDF5": {
+                "title": "Help: Create HDF5 File",
+                "image": os.path.join(HELP_IMG_DIR, "help_create.png"),
+                "text_file": os.path.join(HELP_TEXT_DIR, "help_create.txt")
+            },
             "HDF5 processing": {
                 "title": "Help: HDF5 Processing",
-                "image": os.path.join(HELP_IMG_DIR, "help_processing.png"),  # Replace with valid path
+                "image": os.path.join(HELP_IMG_DIR, "help_processing.png"),
                 "text_file": os.path.join(HELP_TEXT_DIR, "help_processing.txt")
             },
             "Preview dim. red.": {
                 "title": "Help: Dimensionality Reduction Preview",
-                "image": os.path.join(HELP_IMG_DIR, "help_preview.png"),
-                "text_file": os.path.join(HELP_TEXT_DIR, "/help_preview.txt")
+                "image": os.path.join(HELP_IMG_DIR, "help_preview_dimred.png"),
+                "text_file": os.path.join(HELP_TEXT_DIR, "help_preview_dimred.txt")
             },
             "Compute dim. red.": {
                 "title": "Help: Compute Dimensionality Reduction",
-                "image": os.path.join(HELP_IMG_DIR, "help_compute.png"),
-                "text_file": os.path.join(HELP_TEXT_DIR, "help_compute.txt")
+                "image": os.path.join(HELP_IMG_DIR, "help_compute_dimred.png"),
+                "text_file": os.path.join(HELP_TEXT_DIR, "help_compute_dimred.txt")
+            },
+            "Compute dFC": {
+                "title": "Help: Compute dynamic Functional Connectivity (dFC)",
+                "image": os.path.join(HELP_IMG_DIR, "help_compute_dfc.png"),
+                "text_file": os.path.join(HELP_TEXT_DIR, "help_compute_dfc.txt")
             }
         }
     

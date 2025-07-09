@@ -189,8 +189,8 @@ class processingGUI(ttk.Frame):
         
         run_frame = ttk.Frame(self)
         run_frame.pack()
-        ttk.Button(run_frame, text="Run Processing", command=self.run_processing).pack(side=tk.LEFT, padx=5)
-        ttk.Button(run_frame, text="Repack HDF5", command=self.repack_hdf5).pack(side=tk.LEFT, padx=5)
+        ttk.Button(run_frame, text="Run Processing", command=self.run_processing).pack(side=tk.LEFT, padx=5, pady=15)
+        ttk.Button(run_frame, text="Repack HDF5", command=self.repack_hdf5).pack(side=tk.LEFT, padx=5, pady=15)
 
     def repack_hdf5(self):
         input_path = self.input_entry.get()

@@ -53,11 +53,11 @@ class visualize_DimRedGUI(ttk.Frame):
         model_selection_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
         model_selection_frame.columnconfigure(0, weight=1)
         model_selection_frame.columnconfigure(1, weight=1)
-        model_selection_frame.rowconfigure(1, weight=1)
+        # model_selection_frame.rowconfigure(1, weight=1)
 
         # Select Model Box
         ttk.Label(model_selection_frame, text="Select Model").grid(row=0, column=0, sticky="w", pady=(0,5))
-        self.model_listbox = tk.Listbox(model_selection_frame, exportselection=False)
+        self.model_listbox = tk.Listbox(model_selection_frame, exportselection=False, height=6)
         self.model_listbox.grid(row=1, column=0, sticky="nsew", padx=(0, 10))
         model_scrollbar = ttk.Scrollbar(model_selection_frame, orient=tk.VERTICAL, command=self.model_listbox.yview)
         model_scrollbar.grid(row=1, column=0, sticky="nse", padx=(0,10))
@@ -66,7 +66,7 @@ class visualize_DimRedGUI(ttk.Frame):
 
         # Model Attributes Box
         ttk.Label(model_selection_frame, text="Model attributes").grid(row=0, column=1, sticky="w", pady=(0,5))
-        self.attr_listbox = tk.Listbox(model_selection_frame, exportselection=False)
+        self.attr_listbox = tk.Listbox(model_selection_frame, exportselection=False, height=6)
         self.attr_listbox.grid(row=1, column=1, sticky="nsew")
         attr_scrollbar = ttk.Scrollbar(model_selection_frame, orient=tk.VERTICAL, command=self.attr_listbox.yview)
         attr_scrollbar.grid(row=1, column=1, sticky="nse")
@@ -74,10 +74,10 @@ class visualize_DimRedGUI(ttk.Frame):
 
         # --- 4 & 5. Filepaths and Datasets Section ---
         data_selection_frame = ttk.Frame(main_frame)
-        data_selection_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
+        data_selection_frame.pack(fill=tk.X, pady=(0, 10))
         data_selection_frame.columnconfigure(0, weight=1)
         data_selection_frame.columnconfigure(2, weight=1)
-        data_selection_frame.rowconfigure(1, weight=1)
+        # data_selection_frame.rowconfigure(1, weight=1)
 
         # --- Select Filepaths Box (using a bordered LabelFrame) ---
         filepath_labelframe = ttk.LabelFrame(data_selection_frame, text="Select filepaths")

@@ -1,0 +1,9 @@
+[1] fichiers d'entrée: les fichiers d'entrée dans lesquels les datasets seront chargés sont indiqués ici. L'utilisateur peut ajouter des fichiers avec Add, en supprimer avec Delete, et naviguer pour ajouter des fichiers avec Browse.
+
+[2] jeux de données (datasets): le chemin d'accès des jeux de données à considérer au sein des fichiers de la section [1] sont ajoutés ici.
+
+[3] fichier de sortie: le fichier de sortie dans lequel sauvegarder les modèles de réduction de dimensionnalité est sélectionné ici.
+
+[4] modèles à calculer: sélection des modèles de réduction de dimensionnalité à calculer.
+
+[5] lancement du calcul: lancement du calcul de réduction de dimensionnalité et de sauvegarde dans le fichier de sortie.

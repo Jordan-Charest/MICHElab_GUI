@@ -1,0 +1,7 @@
+[1] fichier de sortie: sélection du fichier de sortie dans lequel seront sauvegardés les jeux de données (datasets). La boîte Overwrite permet d'indiquer si un fichier déjà existant devrait être supprimé.
+
+[2] jeux de données (datasets): sélection des fichiers de données à ajouter, leur nombre d'images par seconde, le chemin d'accès (group) désiré au sein du fichier HDF5, ainsi que les attributs (sous la forme clé:valeur, séparés par des virgules).
+
+[3] ajout et retrait de champs: les champs de jeux de données peuvent être ajoutés et supprimés avec les boutons Add et Delete
+
+[4] création du fichier HDF5: Appuyer sur Save file permet de créer le fichier HDF5 indiqué comme fichier de sortie et d'y sauvegarder les jeux de données indiqués à la section [2] ainsi que les attributs reliés.
