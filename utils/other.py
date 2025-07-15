@@ -57,3 +57,26 @@ def center_mean(signal, strictly_positive=True, center_loc=1):
     signal = signal * (center_loc/mean) # Mean is now centered at center_loc
 
     return signal
+
+def cast_str_to_float_and_int(val_str):
+    """Casts a string corresponding to a number to a float or an int depending on the presence of a decimal point.
+    """
+
+    try:
+        if "." in val_str:
+            val = float(val_str)
+        else:
+            val = int(val_str)
+
+    except:
+        raise ValueError("Invalid value {val} for casting to float or int.")
+    
+    return val
+
+def flat_to_symmetric(flat, N):
+    """Convert a flattened upper triangle vector to a full symmetric matrix."""
+    mat = np.zeros((N, N))
+    inds = np.triu_indices(N)
+    mat[inds] = flat
+    mat[(inds[1], inds[0])] = flat  # Reflect upper triangle to lower
+    return mat

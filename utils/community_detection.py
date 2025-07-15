@@ -46,7 +46,7 @@ def compute_coassignment_probability_kmeans(data, N_iters=1000, k_min=2, k_max=3
     clusters = np.zeros((data.shape[0], N_iters))
 
     for i in range(N_iters):
-        clustering = KMeans(n_clusters=k[i]).fit(data)
+        clustering = KMeans(n_clusters=k[i], n_init='auto').fit(data)
         clusters[:, i] =  clustering.labels_
 
     coassignment_matrix = compute_consensus_matrix_from_labels(clusters)

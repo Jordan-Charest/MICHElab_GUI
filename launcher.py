@@ -4,6 +4,7 @@ import gui_tabs.Compute_DimRed_GUI
 import gui_tabs.Processing_GUI
 import gui_tabs.Create_HDF5_dataset_GUI
 import gui_tabs.dfc_GUI
+import gui_tabs.CommunityDetection_GUI
 
 from tkinter import ttk
 import tkinter as tk
@@ -180,6 +181,7 @@ class Launcher(tk.Tk):
         importlib.reload(gui_tabs.Visualize_DimRed_GUI)
         importlib.reload(gui_tabs.Compute_DimRed_GUI)
         importlib.reload(gui_tabs.dfc_GUI)
+        importlib.reload(gui_tabs.CommunityDetection_GUI)
 
         self.init_tabs()
 
@@ -194,12 +196,14 @@ class Launcher(tk.Tk):
         processing = gui_tabs.Processing_GUI.processingGUI(self.notebook)
         create_HDF5 = gui_tabs.Create_HDF5_dataset_GUI.create_HDF5_dataset_GUI(self.notebook)
         dfc = gui_tabs.dfc_GUI.dfcGUI(self.notebook)
+        community_detection = gui_tabs.CommunityDetection_GUI.CommunityDetectionGUI(self.notebook)
 
         self.notebook.add(create_HDF5, text="Create HDF5")
         self.notebook.add(processing, text="HDF5 processing")
         self.notebook.add(visualize_dimred, text="Preview dim. red.")
         self.notebook.add(compute_dimred, text="Compute dim. red.")
         self.notebook.add(dfc, text="Compute dFC")
+        self.notebook.add(community_detection, text="Comm. detect.")
 
 def load_help_content():
 
