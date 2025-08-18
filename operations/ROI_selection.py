@@ -2,13 +2,20 @@ import numpy as np
 import subprocess
 import tkinter as tk
 from tkinter import filedialog, ttk, messagebox
-from utils.hdf5 import get_data_from_dataset, save_data_to_dataset
 import tifffile
 from tempfile import NamedTemporaryFile
 import os
 from pathlib import Path
 import sys
 import json
+
+# Necessary for running as a subprocess
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+
+from utils.hdf5 import get_data_from_dataset, save_data_to_dataset
+from utils.parsing import parse_key_value_args
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MACRO_DIR = os.path.join(BASE_DIR, "FIJI_macros/macro_launch.ijm")
@@ -169,56 +176,94 @@ def select_parameters(filename, dataset_list):
     
     return selected_dataset, selected_image_path, make_copy, copy_name, invert_mask, invert_copy_name
 
-if __name__ == "__main__":
-    if len(sys.argv) < 3:
-        print("Usage: python script.py <HDF5 file> <dataset1> [<dataset2> ...]")
-        sys.exit(1)
+def main():
+    if "--batch" in sys.argv:   # Batch mode
 
-    hdf5_file = sys.argv[1]
-    datasets = sys.argv[2:]
-    selected_dataset, selected_image_path, make_copy, copy_name, invert_mask, invert_copy_name = select_parameters(hdf5_file, datasets)
+        hdf5_file = sys.argv[2]
+        datasets = sys.argv[3].split(',')
+        args = parse_key_value_args(sys.argv[4:])
 
-    # Create temp image file if not provided
-    if selected_image_path:
-        image_path = Path(selected_image_path).resolve()
+        selected_image_path = None
+        selected_dataset = args["selected_dataset"]
+        make_copy = False
+        invert_mask = False
+        copy_name = None
+        invert_copy_name = None
+        mask_file = os.path.join(hdf5_file, args["mask_file"])
+
     else:
-        data, _ = get_data_from_dataset(hdf5_file, selected_dataset)
-        with NamedTemporaryFile(delete=False, suffix=".tif") as temp_img:
-            image_path = Path(temp_img.name).resolve()
-        tifffile.imwrite(image_path, data.astype(np.float32))
+        if len(sys.argv) < 3:
+            print("Usage: python script.py <HDF5 file> <dataset1> [<dataset2> ...]")
+            sys.exit(1)
 
-    # Create temporary text file for ROI output
-    with NamedTemporaryFile(delete=False, suffix=".tif") as temp_tif:
-        temp_ROI_tif_path = Path(temp_tif.name).resolve()
+        hdf5_file = sys.argv[1]
+        datasets = sys.argv[2:]
+        mask_file = None
+        selected_dataset, selected_image_path, make_copy, copy_name, invert_mask, invert_copy_name = select_parameters(hdf5_file, datasets)
 
-    # Modify and create temporary ROI macro file
-    with open(ROI_MACRO_DIR, "r") as temp_macro:
-        macro_content = temp_macro.read().replace("<output_path>", temp_ROI_tif_path.as_posix())
+    if mask_file is not None:
 
-    with NamedTemporaryFile(delete=False, suffix=".ijm", mode="w") as temp_macro_file:
-        temp_macro_file.write(macro_content)
-        temp_ROI_macro_path = Path(temp_macro_file.name).resolve()
+        try:
+            print(f"Using mask already saved in {mask_file}.")
+            mask = np.load(mask_file)
 
-    # Modify and create the launching macro file
-    with open(MACRO_DIR, "r") as temp_macro:
-        macro_content = temp_macro.read() \
-            .replace("<stack_path>", image_path.as_posix()) \
-            .replace("<macro_path>", temp_ROI_macro_path.as_posix())
+        except:
+            print("Error while trying to load the mask. Manual selection is required.")
+            mask_file = None
 
-    with NamedTemporaryFile(delete=False, suffix=".ijm", mode="w") as temp_macro_file:
-        temp_macro_file.write(macro_content)
-        temp_macro_path = Path(temp_macro_file.name).resolve()
+    if mask_file is None:
 
-    # Run FIJI and get ROI mask
-    mask = get_roi_mask_from_fiji(temp_macro_path.as_posix(), temp_ROI_tif_path)
+        # Create temp image file if not provided
+        if selected_image_path:
+            image_path = Path(selected_image_path).resolve()
+        else:
+            data, _ = get_data_from_dataset(hdf5_file, selected_dataset)
+            with NamedTemporaryFile(delete=False, suffix=".tif") as temp_img:
+                image_path = Path(temp_img.name).resolve()
+            tifffile.imwrite(image_path, data.astype(np.float32))
+
+        # Create temporary text file for ROI output
+        with NamedTemporaryFile(delete=False, suffix=".tif") as temp_tif:
+            temp_ROI_tif_path = Path(temp_tif.name).resolve()
+
+        # Modify and create temporary ROI macro file
+        with open(ROI_MACRO_DIR, "r") as temp_macro:
+            macro_content = temp_macro.read().replace("<output_path>", temp_ROI_tif_path.as_posix())
+
+        with NamedTemporaryFile(delete=False, suffix=".ijm", mode="w") as temp_macro_file:
+            temp_macro_file.write(macro_content)
+            temp_ROI_macro_path = Path(temp_macro_file.name).resolve()
+
+        # Modify and create the launching macro file
+        with open(MACRO_DIR, "r") as temp_macro:
+            macro_content = temp_macro.read() \
+                .replace("<stack_path>", image_path.as_posix()) \
+                .replace("<macro_path>", temp_ROI_macro_path.as_posix())
+
+        with NamedTemporaryFile(delete=False, suffix=".ijm", mode="w") as temp_macro_file:
+            temp_macro_file.write(macro_content)
+            temp_macro_path = Path(temp_macro_file.name).resolve()
+
+        # Run FIJI and get ROI mask
+        mask = get_roi_mask_from_fiji(temp_macro_path.as_posix(), temp_ROI_tif_path)
+
+        # Save mask for future use
+        filepath = os.path.join(hdf5_file, "../ROI_mask.npy")
+        print(f"Saving mask to {filepath}.")
+
+        np.save(filepath, mask)
+
+        os.remove(image_path)
+        os.remove(temp_macro_path)
+        os.remove(temp_ROI_macro_path)
+        os.remove(temp_ROI_tif_path)
+
+        
 
     # Apply ROI mask to datasets
     apply_roi_mask(hdf5_file, datasets, mask, make_copy, copy_name, invert_mask, invert_copy_name)
 
-    # Cleanup temporary files
-    os.remove(image_path)
-    os.remove(temp_macro_path)
-    os.remove(temp_ROI_macro_path)
-    os.remove(temp_ROI_tif_path)
 
+if __name__ == "__main__":
+    main()
     

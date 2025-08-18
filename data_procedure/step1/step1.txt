@@ -1,0 +1,14 @@
+La première étape est de calculer les mouvements orofaciaux (face motion) à l'aide du vidéo de monitoring de la souris.
+
+La procédure se trouve dans face_motion_and_trimming.py et les fonctions requises dans funcs.py.
+
+Assurez-vous de mettre à jour les chemin d'accès dans la fonction return_filepaths de funcs.py pour qu'ils correspondent à votre chemin local.
+
+Le fichier face_motion_and_trimming.py fonctionne en trois parties:
+
+1) Calcul du face motion. Le code a été adapté du code développé par Antoine Daigle. Il suffit de sélectionner la zone faciale de la souris, et le face motion est sauvegardé au format .npy
+
+2) Sélection du début et la fin de l'imagerie. Une fenêtre apparaît qui permet de sélectionner le début (premier frame où la lumière est visible) et la fin (dernier frame où la lumière est visible) de la séance d'imagerie.
+Si la clé monitoring_frame_range se trouve déjà dans le fichier data.txt pour la souris, ce range sera utilisé automatiquement. Sinon, le range sélectionné manuellement sera ajouté au fichier.
+
+3) Dû à des nombres de FPS différents entre les données brutes et la caméra de monitoring, il est nécessaire d'adapter le vidéo et le face motion pour qu'ils aient le même nombre de frames.

@@ -27,10 +27,16 @@ def crosscorrelation_squared(x, y, maxlag):
     """
     return np.correlate(x, y, mode='full')[len(y)-maxlag-1:len(y)+maxlag]
 
-def max_r_coeff(signal1, signal2, max_shift=100, squared=False):
+def max_r_coeff(signal1, signal2, max_shift=100, squared=False, lag_sign=None):
     # Step 1: Compute the cross-correlation without subtracting the mean (since signals are z-scored)
     corr = crosscorrelation_squared(signal1, signal2, max_shift)
-    lags = np.arange(-max_shift, max_shift+1, 1)
+
+    if lag_sign is None:
+        lags = np.arange(-max_shift, max_shift+1, 1)
+    elif lag_sign.lower() == "negative":
+        lags = np.arange(-max_shift, 1, 1)
+    elif lag_sign.lower() == "positive":
+        lags = np.arange(0, max_shift+1, 1)
 
     # Step 2: Find the lag with the maximum cross-correlation
     max_corr_index = np.argmax(np.abs(corr))  # max absolute cross-correlation
@@ -45,7 +51,7 @@ def max_r_coeff(signal1, signal2, max_shift=100, squared=False):
 
     return max_lag, r_squared
 
-def r_coeff_2mats(signal1, signal2, max_shift=100, lag=False, print_flag=False, convert_to_s=False, fps=None, squared=False):
+def r_coeff_2mats(signal1, signal2, max_shift=100, lag=False, print_flag=False, convert_to_s=False, fps=None, squared=False, lag_sign=None):
     
     R2_mat = np.zeros((signal1.shape[1], signal1.shape[2]))
 
@@ -60,7 +66,7 @@ def r_coeff_2mats(signal1, signal2, max_shift=100, lag=False, print_flag=False, 
                 continue
 
             if lag:
-                lag_mat[row, col], R2_mat[row, col] = max_r_coeff(signal1[:,row,col], signal2[:,row,col], max_shift=max_shift, squared=squared)
+                lag_mat[row, col], R2_mat[row, col] = max_r_coeff(signal1[:,row,col], signal2[:,row,col], max_shift=max_shift, squared=squared, lag_sign=lag_sign)
             else:
                 R2_mat[row, col] = r_coeff(signal1[:,row,col], signal2[:,row,col], squared=squared)
 

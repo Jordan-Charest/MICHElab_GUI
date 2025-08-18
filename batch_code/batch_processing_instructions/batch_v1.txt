@@ -1,0 +1,17 @@
+# Make copy of file before modifying (suffix _RAW to suffix _TEMP)
+D:\mouse_data\new_data\M{mouse_num}\formatted\M{mouse_num}_RAW.h5 copy_file D:\mouse_data\new_data\M{mouse_num}\formatted\M{mouse_num}_TEMP.h5
+
+# Cut ROI
+D:\mouse_data\new_data\M{mouse_num}\formatted\M{mouse_num}_TEMP.h5 ROI_selection data/3d/dHbT,data/3d/GCaMP,data/3d/dHbO,data/3d/dHbR,data/2d/green_avg selected_dataset=data/2d/green_avg;str mask_file=../ROI_mask.npy;str
+
+# Apply intensity mask based on average green raw data
+D:\mouse_data\new_data\M{mouse_num}\formatted\M{mouse_num}_TEMP.h5 intensity_mask data/3d/dHbT,data/3d/GCaMP,data/3d/dHbO,data/3d/dHbR,data/2d/green_avg mask_path=data/2d/green_avg;str method=threshold;str threshold=0.09;float dilation=1;int copy_name=None;str
+
+# Apply gaussian time filter 
+D:\mouse_data\new_data\M{mouse_num}\formatted\M{mouse_num}_TEMP.h5 time_gauss_filter data/3d/GCaMP,data/3d/dHbT,data/3d/dHbO,data/3d/dHbR,data/1d/face_motion,data/1d/face_motion_lagged sigma=5;float radius=6;int
+
+# zscore data
+D:\mouse_data\new_data\M{mouse_num}\formatted\M{mouse_num}_TEMP.h5 zscore data/3d/GCaMP,data/3d/dHbT,data/3d/dHbO,data/3d/dHbR
+
+# Repack final HDF5 file to reduce size (suffix _TEMP to suffix _v1)
+D:\mouse_data\new_data\M{mouse_num}\formatted\M{mouse_num}_TEMP.h5 repack_file D:\mouse_data\new_data\M{mouse_num}\formatted\M{mouse_num}_v1.h5

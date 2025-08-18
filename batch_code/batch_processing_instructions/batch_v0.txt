@@ -1,0 +1,29 @@
+# Make copy of file before modifying (suffix _RAW to suffix _TEMP)
+D:\mouse_data\new_data\M{mouse_num}\formatted\M{mouse_num}_RAW.h5 copy_file D:\mouse_data\new_data\M{mouse_num}\formatted\M{mouse_num}_TEMP.h5
+
+# Cut ROI (mask_file path is relative to the hdf5 file location)
+D:\mouse_data\new_data\M{mouse_num}\formatted\M{mouse_num}_TEMP.h5 ROI_selection data/3d/dHbT,data/3d/GCaMP,data/3d/dHbO,data/3d/dHbR,data/2d/green_avg selected_dataset=data/2d/green_avg;str mask_file=../ROI_mask.npy;str
+
+# Apply black top hat mask based on average green raw data
+D:\mouse_data\new_data\M{mouse_num}\formatted\M{mouse_num}_TEMP.h5 intensity_mask data/3d/dHbT,data/3d/GCaMP,data/3d/dHbO,data/3d/dHbR,data/2d/green_avg mask_path=data/2d/green_avg;str method=black_tophat;str structuring_element=5;float threshold=0.02;float dilation=0;int copy_name=None;str
+
+# Apply intensity mask based on average green raw data
+D:\mouse_data\new_data\M{mouse_num}\formatted\M{mouse_num}_TEMP.h5 intensity_mask data/3d/dHbT,data/3d/GCaMP,data/3d/dHbO,data/3d/dHbR,data/2d/green_avg mask_path=data/2d/green_avg;str method=threshold;str threshold=0.08;float dilation=1;int copy_name=None;str
+
+# Apply bandpass to hemodynamic data (Butterworth lowpass below 0.4 Hz; excludes infraslow (0.009 - 0.08) and intermediate (0.08 - 0.4) frequencies, stopping before the calcium delta band (0.4 - 4))
+D:\mouse_data\new_data\M{mouse_num}\formatted\M{mouse_num}_TEMP.h5 bandpass data/3d/dHbT,data/3d/dHbO,data/3d/dHbR method=butter;str lowcut=0.008;float highcut=0.09;float order=3;int copy_name=None;str
+
+# Apply highpass to GCaMP to remove hemodynamic infraslow contamination
+D:\mouse_data\new_data\M{mouse_num}\formatted\M{mouse_num}_TEMP.h5 bandpass data/3d/GCaMP method=butter;str lowcut=0.09;float highcut=0;float order=3;int copy_name=None;str
+
+# Downsample all 3d datasets from 12 to 3 fps
+D:\mouse_data\new_data\M{mouse_num}\formatted\M{mouse_num}_TEMP.h5 downsampling data/3d/dHbT,data/3d/GCaMP,data/3d/dHbO,data/3d/dHbR original_fps=12;int target_fps=3;int
+
+# Apply gaussian time filter 
+D:\mouse_data\new_data\M{mouse_num}\formatted\M{mouse_num}_TEMP.h5 time_gauss_filter data/3d/GCaMP,data/3d/dHbT,data/3d/dHbO,data/3d/dHbR sigma=5;float radius=6;int
+
+# zscore data
+D:\mouse_data\new_data\M{mouse_num}\formatted\M{mouse_num}_TEMP.h5 zscore data/3d/GCaMP,data/3d/dHbT,data/3d/dHbO,data/3d/dHbR
+
+# Repack final HDF5 file to reduce size (suffix _TEMP to suffix _v2)
+D:\mouse_data\new_data\M{mouse_num}\formatted\M{mouse_num}_TEMP.h5 repack_file D:\mouse_data\new_data\M{mouse_num}\formatted\M{mouse_num}_3fps_GCaMP_highpass_HbT_infraslow.h5

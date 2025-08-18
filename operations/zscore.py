@@ -1,6 +1,13 @@
-from utils.hdf5 import get_data_from_dataset, save_data_to_dataset, log
+import os
 from scipy.stats import zscore
 import sys
+
+# Necessary for running as a subprocess
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+
+from utils.hdf5 import get_data_from_dataset, save_data_to_dataset, log
 
 # warnings.filterwarnings('ignore')
 

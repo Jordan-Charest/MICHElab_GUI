@@ -4,6 +4,13 @@ from tkinter import ttk, messagebox
 import matplotlib.pyplot as plt
 import sys
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import os
+
+# Necessary for running as a subprocess
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+
 from utils.hdf5 import get_data_from_dataset, save_data_to_dataset
 from utils.detrending import compute_dff_using_minfilter
 from utils.parsing import parse_key_value_args

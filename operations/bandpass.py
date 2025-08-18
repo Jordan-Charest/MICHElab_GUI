@@ -4,11 +4,18 @@ from tkinter import ttk, messagebox
 import matplotlib.pyplot as plt
 import sys
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from utils.hdf5 import get_data_from_dataset, save_data_to_dataset
 from scipy.signal import butter, filtfilt
+import os
+
+# Necessary for running as a subprocess
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+
+from utils.hdf5 import get_data_from_dataset, save_data_to_dataset
 from utils.parsing import parse_key_value_args
 
-def bandpass_filter(filename, dataset_path, lowcut, highcut, method="butter", order=3):
+def bandpass_filter(filename, dataset_path, lowcut=None, highcut=None, method="butter", order=3):
     data, attributes = get_data_from_dataset(filename, dataset_path)
     fps = attributes["fps"]
 
@@ -16,7 +23,18 @@ def bandpass_filter(filename, dataset_path, lowcut, highcut, method="butter", or
         nyq = fps / 2
         low = lowcut / nyq
         high = highcut / nyq
-        b, a = butter(order, [low, high], btype='band')
+
+        if lowcut in (0, None):
+            btype = "lowpass"
+            freqs = high
+        elif highcut in (0, None):
+            btype = "highpass"
+            freqs = low
+        else:
+            btype = "bandpass"
+            freqs = [low, high]
+            
+        b, a = butter(order, freqs, btype=btype)
 
         def butterworth(data, b, a):
             max_value = np.max(np.abs(data))

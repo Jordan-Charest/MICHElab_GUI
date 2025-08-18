@@ -2,6 +2,7 @@ import sys
 import subprocess
 import os
 
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 BATCH_INSTRUCTIONS_DIR = os.path.join(BASE_DIR, "batch_processing_instructions")
 OPERATIONS_DIR = os.path.join(BASE_DIR, "../operations")
@@ -42,12 +43,12 @@ def run_operations(input_file, mouse_num):
                 print(e)
                 continue
             
-            script_path = os.path.join(OPERATIONS_DIR, "{operation}.py")  # Assuming each operation has a corresponding script named <operation>.py
+            script_path = os.path.join(OPERATIONS_DIR, f"{operation}.py")  # Assuming each operation has a corresponding script named <operation>.py
             
             command = [sys.executable, script_path, "--batch", filename] + [datasets] + params
             
             print(f"Executing: {' '.join(command)}")
-            result = subprocess.run(command, capture_output=False, text=True)
+            result = subprocess.run(command, capture_output=False, text=True, cwd=PROJECT_ROOT)
             
             if result.returncode != 0:
                 print(f"Error in {operation}: {result.stderr}")
@@ -61,5 +62,7 @@ if __name__ == "__main__":
         sys.exit(1)
     
     input_file = os.path.join(BATCH_INSTRUCTIONS_DIR, sys.argv[1])
-    mouse_num = int(sys.argv[2])  # Convert mouse_num to an integer
-    run_operations(input_file, mouse_num)
+    mice_num = str(sys.argv[2]).split(',')  # Convert mice_num to a list of strings
+
+    for mouse_num in mice_num:
+        run_operations(input_file, mouse_num)

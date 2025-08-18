@@ -4,9 +4,16 @@ from tkinter import ttk, messagebox
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from scipy.ndimage import gaussian_filter1d
+import os
+import sys
+
+# Necessary for running as a subprocess
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+
 from utils.hdf5 import get_data_from_dataset, save_data_to_dataset
 from utils.parsing import parse_key_value_args
-import sys
 
 def apply_time_gauss_to_data(filename, dataset_paths, sigma=6, radius=6, copy_name=None):
 

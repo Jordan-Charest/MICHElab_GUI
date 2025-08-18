@@ -1,10 +1,17 @@
 import numpy as np
-from utils.hdf5 import get_data_from_dataset, save_data_to_dataset, parameter_GUI, log
 import warnings
 import sys
-from utils.parsing import parse_key_value_args
+import os
 
 warnings.filterwarnings('ignore')
+
+# Necessary for running as a subprocess
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+
+from utils.parsing import parse_key_value_args
+from utils.hdf5 import get_data_from_dataset, save_data_to_dataset, parameter_GUI, log
 
 # TODO: Implement method for 1d data
 # TODO: Implement frame selection method in addition to frame average

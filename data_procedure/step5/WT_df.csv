@@ -1,0 +1,8 @@
+id,number,GCaMP,age,cohort,monitoring_frame_range,sex
+M39-12_v1,39,False,12,,"(88, 4695)",F
+M42-12_v1,42,False,12,,"(113, 4794)",F
+M44-12_v1,44,False,12,,"(93, 4987)",M
+M45-12_v1,45,False,12,,"(81, 4877)",M
+M46-12_v1,46,False,12,,"(116, 4835)",M
+M251-6_v1,251,WT,6,,"(52, 4966)",F
+M254-6_v1,254,False,6,,"(51, 4955)",M
