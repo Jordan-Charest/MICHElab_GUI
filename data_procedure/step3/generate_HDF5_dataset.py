@@ -4,8 +4,9 @@ import tifffile
 from toolbox_jocha.hdf5 import *
 from toolbox_jocha.mouse_data import *
 import os
+import pickle
 
-from funcs import return_raw_data_root, return_datafile_contents, return_avg_data, return_filename, read_data
+from funcs import return_raw_data_root, return_datafile_contents, return_avg_data, return_filename, read_data, read_regions_file, get_transformed_crop
 
 """From .tif and .npy files containing signals such as GCaMP, HbT, pupillometry and others, generates a HDF5 data file.
 """
@@ -13,16 +14,24 @@ from funcs import return_raw_data_root, return_datafile_contents, return_avg_dat
 ###################### PARAMETERS ######################
 # Set the following parameters before launching script
 
-mice_num = ["39-12", "42-12", "44-12", "45-12", "46-12", "251-6", "254-6"]
-output_file_id = "RAW"
+mice_num = ["44-12"]
+output_file_id = "RAW2"
 fps_num = 3
 time_window = None # Restrict time window
 overwrite = True    # Overwrite the dataset if it already exists under the same name
 # WARNING: be careful with this option!
 
+########## ATLAS PARAMETERS ##########
+
+include_atlas = True # When set to True, will try to load the associated atlas under "registration/atlas"
+atlas_path = f"D:/mouse_data/new_data/atlas/outline_mask_reduced.npy"
+labels_path = f"D:/mouse_data/new_data/atlas/outline_regions_reduced.txt"
+params_filename = "atlas_params.pkl"
+
 ########## SET IMPORT DATA PARAMETERS ##########
 
 keys = ["dHbT", "GCaMP", "green_avg", "dHbO", "dHbR", "face_motion", "face_motion_lagged"]    # Strings for the data to import, same order as in filepaths_to_import
+bin_atlas = 2 # Size with which to bin the atlas (often the raw data on which it is computed is 2 times larger than the data used for analysis; change as needed). None if no binning.
 dimensions = [3, 3, 2, 3, 3, 1, 1]  # Number of dimensions for the signals, same order as above
 fps = [fps_num, fps_num, 0, fps_num, fps_num, fps_num, fps_num]    # fps for each signal, same order as above
 start_index_1d = 0  # Starting index for 1d dataset; set to None for automatic gradient-based start.
@@ -65,9 +74,12 @@ for mouse_num in mice_num:
     create_hdf5(dataset_filename, overwrite=overwrite)
 
     # Add data and attributes to HDF5 file
-    for i in range(len(filepaths_to_import)):
+    for i in range(len(filepaths_to_import)):  
 
         data = np.squeeze(read_data(filepaths_to_import[i]))
+
+        if keys[i] == "dHbT":
+            data_shape = data.shape # Store this for the atlas later
 
         if debug:
             print(keys[i])
@@ -80,6 +92,35 @@ for mouse_num in mice_num:
             attributes["time_window"] = time_window
 
         add_data_to_hdf5(dataset_filename, f"{keys[i]}", data, f"data/{dimensions[i]}d", attributes=attributes)
+
+    if include_atlas:
+        try:
+
+            params_path = os.path.join(import_root_path, f"../{params_filename}")
+            params = read_data(params_path)
+
+            raw_atlas = read_data(atlas_path)
+
+            transformed_atlas = get_transformed_crop(raw_atlas, params)
+            atlas = np.asarray(transformed_atlas, np.float16)
+
+            if bin_atlas is not None:
+                height = atlas.shape[0]
+                width = atlas.shape[1]
+
+                atlas = atlas[::bin_atlas,::bin_atlas]
+
+                print(f"Atlas shape: {atlas.shape}")
+                print(f"Data shape: {data_shape}")
+
+                if atlas.shape != (data_shape[1], data_shape[2]):
+                    atlas = atlas[:data_shape[1], :data_shape[2]]
+
+            add_data_to_hdf5(dataset_filename, "atlas", atlas, f"registration", attributes={"region_labels": read_regions_file(labels_path)})
+
+        except Exception as e:
+            print(e)
+            print("Error while trying to load atlas. Make sure the atlas has already been computed.")
 
     # Save attributes to data group
     attr = return_datafile_contents(mouse_num)

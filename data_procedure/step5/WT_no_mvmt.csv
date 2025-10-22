@@ -1,0 +1,12 @@
+id,number,GCaMP,age,cohort,monitoring_frame_range,sex
+M39-12_v1_no_mvmt,39,False,12,,"(88, 4695)",F
+M42-12_v1_no_mvmt,42,False,12,,"(113, 4794)",F
+M44-12_v1_no_mvmt,44,False,12,,"(93, 4987)",M
+M45-12_v1_no_mvmt,45,False,12,,"(81, 4877)",M
+M46-12_v1_no_mvmt,46,False,12,,"(116, 4835)",M
+M251-6_v1_no_mvmt,251,False,6,,"(52, 4966)",F
+M254-6_v1_no_mvmt,254,False,6,,"(51, 4955)",M
+M308-8_v1_no_mvmt,308,False,8,2.0,"(88, 7378)",F
+M308-10_v1_no_mvmt,308,False,10,2.0,"(111, 7328)",F
+M308-12_v1_no_mvmt,308,False,12,2.0,"(135, 7630)",F
+M308-14_v1_no_mvmt,308,False,14,2.0,"(107, 7269)",F

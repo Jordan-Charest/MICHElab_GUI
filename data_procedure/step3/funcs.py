@@ -1,6 +1,8 @@
 import numpy as np
 import os
 import tifffile
+import pickle
+from scipy.ndimage import zoom, rotate
 
 #### MODIFY FILEPATHS BELOW AS NEEDED
 
@@ -8,6 +10,7 @@ def return_raw_data_root(mouse_num): # Modify as needed according to your file s
     return f"D:/mouse_data/new_data/M{mouse_num}/raw_data"
 
 def return_filename(mouse_num, output_file_id): # Modify as needed according to your file structure
+    # return f"D:/mouse_data/new_data/M{mouse_num}/formatted/M{mouse_num}_{output_file_id}.h5"
     return f"D:/mouse_data/new_data/M{mouse_num}/formatted/M{mouse_num}_{output_file_id}.h5"
 
 def return_avg_data(mouse_num):
@@ -48,6 +51,41 @@ def parse_txt_to_dict(filepath: str):
             result[key] = smart_cast(arg)
     return result
 
+
+def get_transformed_crop(atlas, params):    
+    
+    x = params['x']
+    y = params['y']
+    h = params['h']
+    w = params['w']
+    pad = params['pad']
+    scale = params['scale']
+    angle = params['angle']
+    
+    canvas_h, canvas_w = h + 2 * pad, w + 2 * pad
+
+    scaled = zoom(atlas, scale, order=1)
+    rotated = rotate(scaled, angle, reshape=False, order=1, mode='constant', cval=0.0)
+
+    H, W = rotated.shape
+    overlay = np.zeros((canvas_h, canvas_w), dtype=rotated.dtype)
+
+    x0 = max(0, x)
+    y0 = max(0, y)
+    x1 = min(canvas_w, x + W)
+    y1 = min(canvas_h, y + H)
+
+    rx0 = max(0, -x)
+    ry0 = max(0, -y)
+    rx1 = rx0 + (x1 - x0)
+    ry1 = ry0 + (y1 - y0)
+
+    if x1 > x0 and y1 > y0:
+        overlay[y0:y1, x0:x1] = rotated[ry0:ry1, rx0:rx1]
+
+    atlas_registered = overlay[pad:pad + h, pad:pad + w]
+
+    return atlas_registered
     
 
 #########################################################
@@ -62,6 +100,13 @@ def read_data(filename):
     elif filename[-4:] == ".npy":
         return np.load(filename)
     
+    elif filename[-4:] == ".pkl":
+
+        with open(filename, 'rb') as file:
+            data = pickle.load(file)
+
+        return data
+
     raise ValueError("Could not recognize file extension.")
 
 def split_dataset_path(dataset_path):
@@ -168,3 +213,19 @@ def split_args(s: str):
         parts.append(last)
 
     return parts
+
+def read_regions_file(filepath):
+
+    region_list = []
+
+    with open(filepath, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            if ":" not in line:
+                raise ValueError(f"Invalid line format: {line}")
+            region, name = line.split(":", 1)
+            region_list.append((region, name.strip()))
+    return region_list
+

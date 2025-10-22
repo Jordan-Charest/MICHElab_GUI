@@ -1,0 +1,11 @@
+# Make copy of file before modifying (suffix _RAW to suffix _TEMP)
+D:\mouse_data\new_data\M{mouse_num}\formatted\M{mouse_num}_v1_mvmt.h5 copy_file D:\mouse_data\new_data\M{mouse_num}\formatted\M{mouse_num}_TEMP.h5
+
+# Cut out movement spikes
+D:\mouse_data\new_data\M{mouse_num}\formatted\M{mouse_num}_TEMP.h5 time_removal data/3d/GCaMP,data/3d/GCaMP_mvmt,data/3d/dHbT,data/3d/dHbO,data/3d/dHbR,data/1d/face_motion,data/1d/face_motion_lagged preview_dataset=data/3d/GCaMP_mvmt use_saved_indices=True;bool
+
+# zscore data
+D:\mouse_data\new_data\M{mouse_num}\formatted\M{mouse_num}_TEMP.h5 zscore data/3d/GCaMP,data/3d/dHbT,data/3d/dHbO,data/3d/dHbR
+
+# Repack final HDF5 file to reduce size (suffix _TEMP to suffix _v1)
+D:\mouse_data\new_data\M{mouse_num}\formatted\M{mouse_num}_TEMP.h5 repack_file D:\mouse_data\new_data\M{mouse_num}\formatted\M{mouse_num}_v1_trim_mvmt.h5

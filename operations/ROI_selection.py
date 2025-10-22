@@ -186,9 +186,15 @@ def main():
         selected_image_path = None
         selected_dataset = args["selected_dataset"]
         make_copy = False
-        invert_mask = False
+
+        try:
+            invert_mask = bool(args["invert_mask"])
+            invert_copy_name = str(args["invert_copy_name"])
+        except:
+            invert_mask = False
+            invert_copy_name = None
+            
         copy_name = None
-        invert_copy_name = None
         mask_file = os.path.join(hdf5_file, args["mask_file"])
 
     else:
@@ -257,8 +263,6 @@ def main():
         os.remove(temp_macro_path)
         os.remove(temp_ROI_macro_path)
         os.remove(temp_ROI_tif_path)
-
-        
 
     # Apply ROI mask to datasets
     apply_roi_mask(hdf5_file, datasets, mask, make_copy, copy_name, invert_mask, invert_copy_name)

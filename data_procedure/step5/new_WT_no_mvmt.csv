@@ -1,0 +1,5 @@
+id,number,GCaMP,age,cohort,monitoring_frame_range,sex
+M308-8_v1_no_mvmt,308,True,8,2,"(88, 7378)",F
+M308-10_v1_no_mvmt,308,True,10,2,"(111, 7328)",F
+M308-12_v1_no_mvmt,308,True,12,2,"(135, 7630)",F
+M308-14_v1_no_mvmt,308,True,14,2,"(107, 7269)",F
