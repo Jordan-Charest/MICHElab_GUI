@@ -1,0 +1,14 @@
+# Make copy of file before modifying (suffix _RAW to suffix _TEMP)
+D:\mouse_data\new_data\M{mouse_num}\formatted\dataset.h5 copy_file D:\mouse_data\new_data\M{mouse_num}\formatted\M{mouse_num}_TEMP.h5
+
+# Cut ROI (mask_file path is relative to the hdf5 file location)
+D:\mouse_data\new_data\M{mouse_num}\formatted\M{mouse_num}_TEMP.h5 ROI_selection data/2d/avg,data/2d/green_avg selected_dataset=data/2d/green_avg;str mask_file=../ROI_mask.npy;str
+
+# Apply black top hat mask based on average green raw data
+D:\mouse_data\new_data\M{mouse_num}\formatted\M{mouse_num}_TEMP.h5 intensity_mask data/2d/avg,data/2d/green_avg mask_path=data/2d/green_avg;str method=black_tophat;str structuring_element=5;float threshold=0.02;float dilation=0;int copy_name=tophat;str
+
+# Apply intensity mask based on average green raw data
+D:\mouse_data\new_data\M{mouse_num}\formatted\M{mouse_num}_TEMP.h5 intensity_mask data/2d/avg,data/2d/avg_tophat,data/2d/green_avg mask_path=data/2d/green_avg;str method=threshold;str threshold=0.08;float dilation=1;int copy_name=intensity;str
+
+# Repack final HDF5 file to reduce size (suffix _TEMP to suffix _v3_mvmt)
+D:\mouse_data\new_data\M{mouse_num}\formatted\M{mouse_num}_TEMP.h5 repack_file D:\mouse_data\new_data\M{mouse_num}\formatted\M{mouse_num}_colloque.h5

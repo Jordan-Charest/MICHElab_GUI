@@ -1,0 +1,11 @@
+# Make copy of file before modifying (suffix _RAW to suffix _TEMP)
+D:\mouse_data\new_data\M{mouse_num}\formatted\M{mouse_num}_RAW2.h5 copy_file D:\mouse_data\new_data\M{mouse_num}\formatted\M{mouse_num}_TEMP.h5
+
+# Cut ROI (mask_file path is relative to the hdf5 file location)
+D:\mouse_data\new_data\M{mouse_num}\formatted\M{mouse_num}_TEMP.h5 ROI_selection data/3d/dHbT,data/3d/GCaMP,data/3d/dHbO,data/3d/dHbR,data/2d/green_avg,registration/atlas selected_dataset=data/2d/green_avg;str mask_file=../ROI_mask.npy;str
+
+# Apply registration to data
+D:\mouse_data\new_data\M{mouse_num}\formatted\M{mouse_num}_TEMP.h5 apply_registration data/3d/GCaMP,data/3d/dHbT,data/3d/dHbO,data/3d/dHbR
+
+# Repack final HDF5 file to reduce size (suffix _TEMP to suffix _v2)
+D:\mouse_data\new_data\M{mouse_num}\formatted\M{mouse_num}_TEMP.h5 repack_file D:\mouse_data\new_data\M{mouse_num}\formatted\M{mouse_num}_v2_mvmt_temp.h5

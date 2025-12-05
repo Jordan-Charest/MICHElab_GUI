@@ -97,6 +97,13 @@ def read_data(filename):
     if filename[-4:] == ".tif":
         return tifffile.imread(filename)
     
+    elif filename[-8:] == "proc.npy": # Special case for the facemap output for pupillometry
+        data = np.load(filename, allow_pickle=True)
+        pupil_area = data.item()["pupil"][0]["area"]
+        pupil_diam = 2 * np.sqrt(pupil_area / (2*np.pi))
+
+        return pupil_diam
+    
     elif filename[-4:] == ".npy":
         return np.load(filename)
     
@@ -104,7 +111,6 @@ def read_data(filename):
 
         with open(filename, 'rb') as file:
             data = pickle.load(file)
-
         return data
 
     raise ValueError("Could not recognize file extension.")
@@ -229,3 +235,41 @@ def read_regions_file(filepath):
             region_list.append((region, name.strip()))
     return region_list
 
+def compute_correlation_with_lag(signal1, signal2, lag_range, abs_r=False):
+        """
+        Computes the correlation between signal1 and signal2[a:b] for every lag value in lag_range.
+
+        Parameters:
+            signal1 (1d array): The first signal.
+            signal2 (1d array): The second signal.
+            indices (list or 1d array): A tuple (a, b) specifying the list of indices to consider for signal2.
+            lag_range (tuple): A tuple (x, y) specifying the range of lag values to consider.
+
+        Returns:
+            correlations (list): An array of correlation values as a function of lag.
+        """
+
+        x, y = lag_range
+        correlations = []
+
+        # TODO: change to use scipy.signal.correlate and correlation_lags. It will be much faster I think.
+        for lag in range(x, y + 1):
+            rolled_signal2 = np.roll(signal2, lag)
+            correlation = np.corrcoef(signal1, rolled_signal2)[0, 1]
+            if abs_r:
+                correlation = np.abs(correlation)
+            correlations.append(correlation)
+
+        return np.array(correlations)
+
+def lag_signal(signal_to_lag, ref_signal, lag_range, abs_r=False):
+     
+     # Cross correlate face_motion with the cortical signal (HbT or GCaMP)
+    correlations = compute_correlation_with_lag(ref_signal, signal_to_lag, lag_range=lag_range, abs_r=abs_r)
+    max_correl_index = np.argmax(correlations)
+    max_correl_lag = np.arange(lag_range[0], lag_range[1]+1, 1)[max_correl_index]
+
+    # Apply spacing indices and save the sliced face_motion, sliced+lagged face_motion, and sliced video
+    lagged_signal = np.roll(signal_to_lag, max_correl_lag)
+
+    return lagged_signal, max_correl_lag

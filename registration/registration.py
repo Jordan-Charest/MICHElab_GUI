@@ -7,6 +7,7 @@ import os
 import sys
 import pickle
 
+### ADAPTED FROM CODE BY ALEXANDRE CLÉROUX CUILLERIER
 
 def load_first_frame(tiff_path):
     with tiff.TiffFile(tiff_path) as tif:
@@ -232,14 +233,14 @@ def main(folder_path_func, mice_num, overwrite=False, save_output=False):
 
     for mouse_num in mice_num:
 
-        folder_path = folder_path_func(mouse_num)
-        rawdata_path = os.path.join(folder_path, "./raw_data/rawdata_green.tif")
-        atlas_path = r"D:/mouse_data/new_data/atlas/outline_mask_coarse.npy"
-        atlas_outputh_path = os.path.join(folder_path, "atlas.npy")
-        params_output_path = os.path.join(folder_path, "atlas_params.pkl")
+        folder_path = folder_path_func(mouse_num) # TO MODIFY: as appropriate depending on your file structure; path
+        rawdata_path = os.path.join(folder_path, "./raw_data/rawdata_green.tif") # TO MODIFY: path to the raw data to display beneath the atlas mask in the GUI
+        atlas_path = r"D:/mouse_data/new_data/atlas/outline_mask_coarse.npy" # TO MODIFY: path to the atlas to use
+        atlas_output_path = os.path.join(folder_path, "atlas.npy") # TO MODIFY: output atlas
+        params_output_path = os.path.join(folder_path, "atlas_params.pkl") # TO MODIFY: where the save the atlas transformation parameters
 
-        if not overwrite and os.path.exists(atlas_outputh_path):
-            print(f"Registration already exists at {atlas_outputh_path}. Skipping.")
+        if not overwrite and os.path.exists(atlas_output_path):
+            print(f"Registration already exists at {atlas_output_path}. Skipping.")
             return
 
         data = load_first_frame(rawdata_path)
@@ -251,15 +252,13 @@ def main(folder_path_func, mice_num, overwrite=False, save_output=False):
 
         if save_output:
             registration = result["final"]
-            np.save(atlas_outputh_path, registration)
+            np.save(atlas_output_path, registration)
 
             with open(params_output_path, "wb") as file:
                 pickle.dump(params, file)
 
 
-
-
-
+# UNUSED
 def generate_atlas_variation(folder_path):
     rawdata_path = os.path.join(folder_path, "rawdata_green.tif")
     atlas_path = r"C:\Users\alexc\Documents\GitHub\WF-analysis\Allen-Atlas\outline_mask_coarse.npy"
@@ -286,7 +285,7 @@ if __name__ == "__main__":
 
     mice_num = sys.argv[1].split(",")
 
-    def return_folder_path(mouse_num):
+    def return_folder_path(mouse_num): # TO MODIFY: path to your mouse data
         return f"D:/mouse_data/new_data/M{mouse_num}/"
     
     main(return_folder_path, mice_num, save_output=True, overwrite=True)

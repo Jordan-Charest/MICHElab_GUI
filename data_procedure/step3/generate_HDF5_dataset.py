@@ -5,8 +5,9 @@ from toolbox_jocha.hdf5 import *
 from toolbox_jocha.mouse_data import *
 import os
 import pickle
+import sys
 
-from funcs import return_raw_data_root, return_datafile_contents, return_avg_data, return_filename, read_data, read_regions_file, get_transformed_crop
+from funcs import return_raw_data_root, return_datafile_contents, return_avg_data, return_filename, read_data, read_regions_file, get_transformed_crop, lag_signal
 
 """From .tif and .npy files containing signals such as GCaMP, HbT, pupillometry and others, generates a HDF5 data file.
 """
@@ -14,8 +15,8 @@ from funcs import return_raw_data_root, return_datafile_contents, return_avg_dat
 ###################### PARAMETERS ######################
 # Set the following parameters before launching script
 
-mice_num = ["44-12"]
-output_file_id = "RAW2"
+mice_num = sys.argv[1].split(",")
+output_file_id = "RAW"
 fps_num = 3
 time_window = None # Restrict time window
 overwrite = True    # Overwrite the dataset if it already exists under the same name
@@ -30,11 +31,17 @@ params_filename = "atlas_params.pkl"
 
 ########## SET IMPORT DATA PARAMETERS ##########
 
-keys = ["dHbT", "GCaMP", "green_avg", "dHbO", "dHbR", "face_motion", "face_motion_lagged"]    # Strings for the data to import, same order as in filepaths_to_import
+keys = ["dHbT", "GCaMP", "green_avg", "dHbO", "dHbR", "face_motion", "pupillo"]    # Strings for the data to import, same order as in filepaths_to_import
 bin_atlas = 2 # Size with which to bin the atlas (often the raw data on which it is computed is 2 times larger than the data used for analysis; change as needed). None if no binning.
 dimensions = [3, 3, 2, 3, 3, 1, 1]  # Number of dimensions for the signals, same order as above
 fps = [fps_num, fps_num, 0, fps_num, fps_num, fps_num, fps_num]    # fps for each signal, same order as above
 start_index_1d = 0  # Starting index for 1d dataset; set to None for automatic gradient-based start.
+
+
+lag_signals = ["face_motion", "pupillo"] # Also add those signals as a lagged version
+lag_wrt = "GCaMP" # Reference signal for the lagging
+lag_range = (-6, 6) # Maximum lag, in frames
+abs_r_lag = True # Whether or not to consider the absolute correlation when computing lag
 
 debug = False       # Print stuff for debugging purposes
 
@@ -60,7 +67,7 @@ for mouse_num in mice_num:
 
     # Comment out this part to leave out pupillo / face motion signals
     filepaths_to_import += [os.path.join(import_root_path, f"../pupillo_face/M{mouse_num}_face_motion_sliced.npy"),
-                            os.path.join(import_root_path, f"../pupillo_face/M{mouse_num}_face_motion_sliced_lagged.npy")]
+                            os.path.join(import_root_path, f"../pupillo_face/RS_M{mouse_num.split('-')[0]}_video_trimmed_proc.npy")]
 
     # os.path.join(import_root_path, f"pupillo/M{mouse_num}_pupillo_{fps_num}fps_lagged.npy")
 
@@ -93,6 +100,15 @@ for mouse_num in mice_num:
 
         add_data_to_hdf5(dataset_filename, f"{keys[i]}", data, f"data/{dimensions[i]}d", attributes=attributes)
 
+        if keys[i] in lag_signals: # Also add the lagged version of this signal
+            reference_signal, _ = get_data_from_dataset(dataset_filename, f"data/3d/{lag_wrt}") # Reference signal for the lag
+            reference_signal = np.nanmean(reference_signal, axis=(1,2))
+
+            lagged_signal, frames = lag_signal(data, reference_signal, lag_range=lag_range, abs_r=abs_r_lag)
+
+            attributes.update
+            add_data_to_hdf5(dataset_filename, f"{keys[i]}_lagged", lagged_signal, f"data/{dimensions[i]}d", attributes=attributes | {"lagged_wrt": lag_wrt, "frames_lagged": frames})
+
     if include_atlas:
         try:
 
@@ -120,7 +136,7 @@ for mouse_num in mice_num:
 
         except Exception as e:
             print(e)
-            print("Error while trying to load atlas. Make sure the atlas has already been computed.")
+            raise FileNotFoundError("Error while trying to load atlas. Make sure the atlas has already been computed.")
 
     # Save attributes to data group
     attr = return_datafile_contents(mouse_num)

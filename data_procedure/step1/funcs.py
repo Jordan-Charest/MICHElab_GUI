@@ -41,11 +41,11 @@ def return_filepaths(mouse_num):
 
     face_motion_output = os.path.join(root, f"pupillo_face/M{mouse_num}_face_motion.npy")
 
-    HbT_input = os.path.join(root, f"raw_data/dHbT.tif")
+    cortical_signal_input = os.path.join(root, f"raw_data/GCaMP.tif")
 
     datafile_input = f"D:/mouse_data/new_data/M{mouse_num}/data.txt"
 
-    return video_input, video_output, face_motion_output, HbT_input, datafile_input
+    return video_input, video_output, face_motion_output, cortical_signal_input, datafile_input
 
 def return_video_path(mouse_num):
     input_path = f"D:/mouse_data/new_data/M{mouse_num}/raw_data/RS_M{mouse_num}_video.mp4"
