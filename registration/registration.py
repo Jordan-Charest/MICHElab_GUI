@@ -6,6 +6,7 @@ import tifffile as tiff
 import os
 import sys
 import pickle
+from matplotlib.colors import ListedColormap
 
 ### ADAPTED FROM CODE BY ALEXANDRE CLÉROUX CUILLERIER
 
@@ -75,7 +76,8 @@ def interactive_register_atlas(atlas, data, previous_params=None):
     rx1 = rx0 + (x1 - x0)
     cropped[y0:y1, x0:x1] = rotated[ry0:ry1, rx0:rx1]
 
-    img_overlay = ax.imshow(cropped, cmap='hot', alpha=init_alpha, zorder=2)
+    # img_overlay = ax.imshow(cropped, cmap='hot', alpha=init_alpha, zorder=2)
+    img_overlay = ax.imshow(cropped, cmap=cmap, alpha=init_alpha, zorder=2)
 
     # === Sliders ===
     ax_x = plt.axes([0.15, 0.35, 0.7, 0.03])
@@ -89,7 +91,8 @@ def interactive_register_atlas(atlas, data, previous_params=None):
     slider_y = Slider(ax_y, 'Y Offset', -canvas_h, canvas_h, valinit=init_y)
     slider_angle = Slider(ax_angle, 'Rotation (°)', -45, 45, valinit=init_angle)
     slider_alpha = Slider(ax_alpha, 'Alpha', 0, 1, valinit=init_alpha)
-    slider_scale = Slider(ax_scale, 'Scale', 0.90, 1.10, valinit=init_scale, valstep=0.01)
+    # slider_scale = Slider(ax_scale, 'Scale', 0.90, 1.10, valinit=init_scale, valstep=0.01)
+    slider_scale = Slider(ax_scale, 'Scale', 1, 3, valinit=init_scale, valstep=0.01)
     slider_contrast = Slider(ax_contrast, 'Data Contrast', 0.1, 10.0, valinit=init_contrast, valstep=0.1)
 
     # === Reset button ===
@@ -235,7 +238,8 @@ def main(folder_path_func, mice_num, overwrite=False, save_output=False):
 
         folder_path = folder_path_func(mouse_num) # TO MODIFY: as appropriate depending on your file structure; path
         rawdata_path = os.path.join(folder_path, "./raw_data/rawdata_green.tif") # TO MODIFY: path to the raw data to display beneath the atlas mask in the GUI
-        atlas_path = r"D:/mouse_data/new_data/atlas/outline_mask_coarse.npy" # TO MODIFY: path to the atlas to use
+        # atlas_path = r"D:/mouse_data/new_data/atlas/outline_mask_coarse.npy" # TO MODIFY: path to the atlas to use
+        atlas_path = r"C:/Users/torte/Desktop/repo_maitrise/pipeline/Connectivity/registration/full_atlas_test.npy"
         atlas_output_path = os.path.join(folder_path, "atlas.npy") # TO MODIFY: output atlas
         params_output_path = os.path.join(folder_path, "atlas_params.pkl") # TO MODIFY: where the save the atlas transformation parameters
 
@@ -282,6 +286,24 @@ def generate_atlas_variation(folder_path):
 
 
 if __name__ == "__main__":
+
+    hex_colors = [
+    "#0055A4",
+    "#56B4E9",
+    # "#0072B2",
+    # "#56B4E9",
+    "#CC79A7",
+    "#8E3B73",
+    "#009E73",
+    "#0F7E3A",
+    "#6CC24A",
+    "#F0E442",
+    "#E69F00",
+    "#D55E00",
+    "#800404"
+]
+    
+    cmap = ListedColormap(hex_colors)
 
     mice_num = sys.argv[1].split(",")
 

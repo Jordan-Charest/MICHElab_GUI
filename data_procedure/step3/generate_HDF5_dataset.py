@@ -25,8 +25,8 @@ overwrite = True    # Overwrite the dataset if it already exists under the same 
 ########## ATLAS PARAMETERS ##########
 
 include_atlas = True # When set to True, will try to load the associated atlas under "registration/atlas"
-atlas_path = f"D:/mouse_data/new_data/atlas/outline_mask_reduced.npy"
-labels_path = f"D:/mouse_data/new_data/atlas/outline_regions_reduced.txt"
+atlas_path = f"D:/mouse_data/new_data/atlas/final_atlas.npy"
+labels_path = f"D:/mouse_data/new_data/atlas/final_regions.txt"
 params_filename = "atlas_params.pkl"
 
 ########## SET IMPORT DATA PARAMETERS ##########

@@ -100,7 +100,7 @@ def read_data(filename):
     elif filename[-8:] == "proc.npy": # Special case for the facemap output for pupillometry
         data = np.load(filename, allow_pickle=True)
         pupil_area = data.item()["pupil"][0]["area"]
-        pupil_diam = 2 * np.sqrt(pupil_area / (2*np.pi))
+        pupil_diam = 2 * np.sqrt(pupil_area / (np.pi))
 
         return pupil_diam
     
